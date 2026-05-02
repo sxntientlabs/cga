@@ -172,37 +172,7 @@ header h1 {
 
 .btn:hover { opacity: 0.9; transform: translateY(-2px); }
 
-.references-section {
-    margin-top: 2rem;
-    padding: 1.5rem;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-}
 
-.references-section h4 {
-    color: var(--navy);
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
-    border-bottom: 2px solid var(--teal);
-    display: inline-block;
-}
-
-.references-section ul {
-    list-style: none;
-    padding: 0;
-}
-
-.references-section li {
-    font-size: 0.85rem;
-    color: #555;
-    margin-bottom: 0.5rem;
-    line-height: 1.4;
-}
-
-.references-section strong {
-    color: var(--navy);
-}
 
 footer {
     margin-top: 50px;

@@ -99,16 +99,16 @@ const assessments = {
     'amt': {
         container: 'amt-section',
         questions: [
-            { text: 'Umur Anda?', options: [{t:'Benar', v:1}, {t:'Salah', v:0}] },
-            { text: 'Waktu / Jam sekarang?', options: [{t:'Benar', v:1}, {t:'Salah', v:0}] },
-            { text: 'Alamat tempat tinggal?', options: [{t:'Benar', v:1}, {t:'Salah', v:0}] },
-            { text: 'Tahun sekarang?', options: [{t:'Benar', v:1}, {t:'Salah', v:0}] },
-            { text: 'Tempat sekarang (RS/Rumah)?', options: [{t:'Benar', v:1}, {t:'Salah', v:0}] },
-            { text: 'Kenal 2 orang (dokter/perawat/keluarga)?', options: [{t:'Benar', v:1}, {t:'Salah', v:0}] },
-            { text: 'Tanggal lahir Anda?', options: [{t:'Benar', v:1}, {t:'Salah', v:0}] },
-            { text: 'Tahun kemerdekaan RI?', options: [{t:'Benar', v:1}, {t:'Salah', v:0}] },
-            { text: 'Nama Presiden RI?', options: [{t:'Benar', v:1}, {t:'Salah', v:0}] },
-            { text: 'Menghitung mundur 20 sampai 1?', options: [{t:'Benar', v:1}, {t:'Salah', v:0}] }
+            { text: 'Umur Anda?', options: [{t:'Bisa jawab', v:1}, {t:'Tidak', v:0}] },
+            { text: 'Waktu / Jam sekarang?', options: [{t:'Bisa jawab', v:1}, {t:'Tidak', v:0}] },
+            { text: 'Alamat tempat tinggal?', options: [{t:'Bisa jawab', v:1}, {t:'Tidak', v:0}] },
+            { text: 'Tahun sekarang?', options: [{t:'Bisa jawab', v:1}, {t:'Tidak', v:0}] },
+            { text: 'Tempat sekarang (RS/Rumah)?', options: [{t:'Bisa jawab', v:1}, {t:'Tidak', v:0}] },
+            { text: 'Kenal 2 orang (dokter/perawat/keluarga)?', options: [{t:'Bisa jawab', v:1}, {t:'Tidak', v:0}] },
+            { text: 'Tanggal lahir Anda?', options: [{t:'Bisa jawab', v:1}, {t:'Tidak', v:0}] },
+            { text: 'Tahun kemerdekaan RI?', options: [{t:'Bisa jawab', v:1}, {t:'Tidak', v:0}] },
+            { text: 'Nama Presiden RI?', options: [{t:'Bisa jawab', v:1}, {t:'Tidak', v:0}] },
+            { text: 'Menghitung mundur 20 sampai 1?', options: [{t:'Bisa jawab', v:1}, {t:'Tidak', v:0}] }
         ]
     },
     'gds': {
