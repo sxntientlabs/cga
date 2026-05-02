@@ -1,0 +1,201 @@
+:root {
+    --bg-gradient-start: #e8f0f8;
+    --bg-gradient-end: #d0e4f4;
+    --primary-navy: #1a2744;
+    --primary-teal: #2a9d8f;
+    --secondary-teal: #1a8a8a;
+    --white: #ffffff;
+    --text-color: #333333;
+    --border-color: #dddddd;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+    color: var(--text-color);
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 800px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+header h1 {
+    font-size: 3rem;
+    color: var(--primary-navy);
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.section-card {
+    background: var(--white);
+    border-radius: 12px;
+    margin-bottom: 15px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.section-header {
+    padding: 15px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    color: white;
+    transition: var(--transition);
+    user-select: none;
+}
+
+.section-header.navy { background-color: var(--primary-navy); }
+.section-header.teal { background-color: var(--primary-teal); }
+
+.section-header:hover {
+    filter: brightness(1.1);
+}
+
+.section-content {
+    padding: 20px;
+    display: none;
+}
+
+.section-content.active {
+    display: block;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.question-group {
+    margin-bottom: 20px;
+}
+
+.question-text {
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.option-btn {
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    text-align: center;
+    transition: var(--transition);
+    font-size: 0.9rem;
+}
+
+.option-btn:hover {
+    border-color: var(--primary-teal);
+    background-color: rgba(42, 157, 143, 0.05);
+}
+
+.option-btn.selected {
+    background-color: var(--primary-teal);
+    color: white;
+    border-color: var(--primary-teal);
+}
+
+.option-btn.selected.navy {
+    background-color: var(--primary-navy);
+    border-color: var(--primary-navy);
+}
+
+.date-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.results-area {
+    margin-top: 30px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid var(--border-color);
+    min-height: 100px;
+    white-space: pre-wrap;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+}
+
+.action-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-primary { background: #60a561; color: white; }
+.btn-danger { background: #b22222; color: white; }
+.btn-secondary { background: #6c757d; color: white; }
+
+.btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+footer {
+    margin-top: 50px;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--primary-navy);
+    padding-bottom: 20px;
+}
+
+footer a {
+    color: var(--primary-navy);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+/* Multi-choice specific */
+.options-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.status-label {
+    font-style: italic;
+    color: #666;
+    margin-top: 5px;
+    font-size: 0.85rem;
+}
