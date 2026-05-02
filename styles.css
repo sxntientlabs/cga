@@ -200,3 +200,35 @@ footer a {
     margin-top: 5px;
     font-size: 0.85rem;
 }
+
+/* BMI Calculator Helper */
+.bmi-calc {
+    margin-top: 15px;
+    padding: 12px;
+    background: #f0f7f6;
+    border-radius: 8px;
+    border: 1px dashed var(--primary-teal);
+}
+
+.bmi-input {
+    width: 80px;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.btn-mini {
+    padding: 6px 12px;
+    background: var(--primary-teal);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.btn-mini:hover {
+    background: var(--secondary-teal);
+}

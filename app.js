@@ -16,25 +16,28 @@ function selectOption(btn, value) {
     Array.from(optionsDiv.children).forEach(child => child.classList.remove('selected'));
     btn.classList.add('selected');
     group.dataset.value = value;
+    updateSectionStatus(btn.closest('.section-content'));
+}
+
+function applyBMI(btn) {
+    const calcDiv = btn.closest('.bmi-calc');
+    const resultDiv = calcDiv.querySelector('#bmi-result');
+    const bmi = parseFloat(resultDiv.dataset.value);
     
-    // Auto-fill logic for CFS
-    const section = btn.closest('.section-content');
-    if (section.id === 'cfs-section' && value > 0) {
-        // If "Ya" is selected, auto-select "Tidak" for subsequent questions
-        const groups = Array.from(section.querySelectorAll('.question-group'));
-        const currentIndex = groups.indexOf(group);
-        for (let i = currentIndex + 1; i < groups.length; i++) {
-            const nextGroup = groups[i];
-            const tidakBtn = Array.from(nextGroup.querySelectorAll('.option-btn')).find(b => b.textContent === 'Tidak');
-            if (tidakBtn) {
-                Array.from(tidakBtn.parentElement.children).forEach(child => child.classList.remove('selected'));
-                tidakBtn.classList.add('selected');
-                nextGroup.dataset.value = 0;
-            }
-        }
-    }
+    if (!bmi) return;
     
-    updateSectionStatus(section);
+    const group = calcDiv.closest('.question-group');
+    const optionsDiv = group.querySelector('.options-stack') || group.querySelector('.options-grid');
+    const btns = optionsDiv.querySelectorAll('.option-btn');
+    
+    let targetIndex = 3; // Default >= 23
+    if (bmi < 19) targetIndex = 0;
+    else if (bmi < 21) targetIndex = 1;
+    else if (bmi < 23) targetIndex = 2;
+    
+    const targetBtn = btns[targetIndex];
+    const values = [0, 1, 2, 3];
+    selectOption(targetBtn, values[targetIndex]);
 }
 
 function updateSectionStatus(section) {
@@ -129,7 +132,7 @@ const assessments = {
             { text: 'Mobilitas?', options: [{t:'Hanya di tempat tidur/kursi roda', v:0}, {t:'Dapat bangkit tapi tidak keluar rumah', v:1}, {t:'Dapat bepergian ke luar rumah', v:2}] },
             { text: 'Stres psikologis/penyakit akut dalam 3 bulan terakhir?', options: [{t:'Ya', v:0}, {t:'Tidak', v:2}] },
             { text: 'Masalah neuropsikologis?', options: [{t:'Demensia berat atau depresi berat', v:0}, {t:'Demensia ringan', v:1}, {t:'Tidak ada gangguan psikologis', v:2}] },
-            { text: 'Indeks Massa Tubuh (IMT)?', options: [{t:'IMT < 19', v:0}, {t:'IMT 19 - < 21', v:1}, {t:'IMT 21 - < 23', v:2}, {t:'IMT 23 atau lebih besar', v:3}] }
+            { text: 'Indeks Massa Tubuh (IMT)?', hasBMICalc: true, options: [{t:'IMT < 19', v:0}, {t:'IMT 19 - < 21', v:1}, {t:'IMT 21 - < 23', v:2}, {t:'IMT 23 atau lebih besar', v:3}] }
         ]
     },
     'frail': {
@@ -145,15 +148,17 @@ const assessments = {
     'cfs': {
         container: 'cfs-section',
         questions: [
-            { text: 'Apakah lansia tersebut menderita penyakit terminal dengan harapan hidup < 6 bulan?', options: [{t:'Ya', v:9}, {t:'Tidak', v:0}] },
-            { text: 'Apakah lansia tersebut menderita ketergantungan total dan mendekati akhir hayat?', options: [{t:'Ya', v:8}, {t:'Tidak', v:0}] },
-            { text: 'Apakah lansia tersebut menderita ketergantungan total untuk perawatan diri (tidak mendekati akhir hayat)?', options: [{t:'Ya', v:7}, {t:'Tidak', v:0}] },
-            { text: 'Apakah lansia tersebut membutuhkan bantuan untuk aktivitas luar, merawat rumah dan/atau mandi?', options: [{t:'Ya', v:6}, {t:'Tidak', v:0}] },
-            { text: 'Apakah lansia tersebut membutuhkan bantuan IADL (menggunakan telepon, berbelanja, menyiapkan makanan, urusan rumah tangga, mencuci pakaian, penggunaan transportasi)?', options: [{t:'Ya', v:5}, {t:'Tidak', v:0}] },
-            { text: 'Walau lansia tidak bergantung pada orang lain, apakah gejala-gejala yang dialami lansia ini membatasi aktivitasnya?', options: [{t:'Ya', v:4}, {t:'Tidak', v:0}] },
-            { text: 'Apakah lansia tersebut memiliki masalah medis yang terkendali dengan baik, namun tidak aktif secara teratur selain berjalan kaki?', options: [{t:'Ya', v:3}, {t:'Tidak', v:0}] },
-            { text: 'Apakah lansia tersebut tidak mengalami gejala penyakit aktif, dan hanya latihan olahraga sesekali?', options: [{t:'Ya', v:2}, {t:'Tidak', v:0}] },
-            { text: 'Apakah lansia tersebut latihan olahraga teratur dan paling bugar di kelompok usianya?', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] }
+            { text: 'Pilih kategori Clinical Frailty Scale (CFS) yang paling sesuai dengan kondisi pasien saat ini:', options: [
+                {t:'1 - Sangat Fit (Very Fit)', v:1, desc:'Energik, aktif, termotivasi, dan rajin berolahraga secara teratur.'},
+                {t:'2 - Fit (Well)', v:2, desc:'Tidak ada gejala penyakit aktif, tetapi kurang bugar dibandingkan kategori 1. Olahraga sesekali.'},
+                {t:'3 - Baik (Managing Well)', v:3, desc:'Masalah medis terkendali dengan baik, namun tidak aktif secara teratur selain berjalan kaki.'},
+                {t:'4 - Rentan (Vulnerable)', v:4, desc:'Tidak bergantung pada orang lain, namun gejala membatasi aktivitas. Sering merasa "lamban" atau lelah.'},
+                {t:'5 - Frailty Ringan (Mildly Frail)', v:5, desc:'Melambat secara nyata, butuh bantuan dalam IADL tingkat tinggi (keuangan, transportasi, belanja, obat).'},
+                {t:'6 - Frailty Sedang (Moderately Frail)', v:6, desc:'Butuh bantuan untuk aktivitas luar dan merawat rumah. Masalah dengan tangga, butuh bantuan mandi/berpakaian.'},
+                {t:'7 - Frailty Berat (Severely Frail)', v:7, desc:'Ketergantungan total untuk perawatan diri karena sebab apa pun (fisik atau kognitif), namun kondisi stabil.'},
+                {t:'8 - Frailty Sangat Berat (Very Severely Frail)', v:8, desc:'Ketergantungan total dan mendekati akhir hayat. Tidak dapat pulih bahkan dari penyakit ringan.'},
+                {t:'9 - Sakit Terminal (Terminally Ill)', v:9, desc:'Mendekati akhir hayat dengan harapan hidup < 6 bulan, meskipun sebelumnya tidak frailty.'}
+            ]}
         ]
     },
     'sar': {
@@ -213,15 +218,64 @@ function renderAssessments() {
             q.options.forEach(opt => {
                 const btn = document.createElement('div');
                 btn.className = 'option-btn';
-                btn.textContent = opt.t;
+                
+                if (opt.desc) {
+                    btn.innerHTML = `<div style="text-align: left;"><div style="font-weight: 700; margin-bottom: 4px;">${opt.t}</div><div style="font-size: 0.8rem; font-weight: 400; opacity: 0.85; line-height: 1.3;">${opt.desc}</div></div>`;
+                } else {
+                    btn.textContent = opt.t;
+                }
+                
                 btn.onclick = () => selectOption(btn, opt.v);
                 optionsDiv.appendChild(btn);
             });
             
             group.appendChild(qText);
             group.appendChild(optionsDiv);
+            
+            if (q.hasBMICalc) {
+                const calcDiv = document.createElement('div');
+                calcDiv.className = 'bmi-calc';
+                calcDiv.innerHTML = `
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="number" placeholder="BB (kg)" class="bmi-input" id="bmi-bb">
+                        <input type="number" placeholder="TB (cm)" class="bmi-input" id="bmi-tb">
+                        <div id="bmi-result" style="font-weight: 700; color: var(--primary-teal); min-width: 60px;">-</div>
+                        <button class="btn-mini" onclick="applyBMI(this)">Pakai</button>
+                    </div>
+                `;
+                
+                const bbInput = calcDiv.querySelector('#bmi-bb');
+                const tbInput = calcDiv.querySelector('#bmi-tb');
+                const resultDiv = calcDiv.querySelector('#bmi-result');
+                
+                const updateBMI = () => {
+                    const bb = parseFloat(bbInput.value);
+                    const tb = parseFloat(tbInput.value) / 100;
+                    if (bb && tb) {
+                        const bmi = bb / (tb * tb);
+                        resultDiv.textContent = bmi.toFixed(1);
+                        resultDiv.dataset.value = bmi;
+                    } else {
+                        resultDiv.textContent = '-';
+                    }
+                };
+                
+                bbInput.oninput = updateBMI;
+                tbInput.oninput = updateBMI;
+                group.appendChild(calcDiv);
+            }
+
             container.appendChild(group);
         });
+
+        // Add footer note for CFS
+        if (id === 'cfs') {
+            const note = document.createElement('div');
+            note.style.cssText = 'font-size: 0.8rem; color: #666; line-height: 1.4; border-top: 1px solid #eee; padding-top: 15px; margin-top: 10px;';
+            note.innerHTML = `<strong>Catatan: Penilaian Frailty pada Demensia</strong><br>
+                Tingkat frailty sesuai dengan tingkat demensia. Gejala umum pada demensia ringan meliputi lupa akan kejadian baru, meskipun masih ingat kejadian lama, mengulang pertanyaan/cerita yang sama, dan penarikan diri secara sosial. Pada demensia sedang, ingatan baru sangat terganggu, meskipun mereka tampaknya masih ingat kejadian lama dengan baik. Mereka dapat melakukan perawatan diri dengan dorongan. Pada demensia berat, mereka tidak dapat melakukan perawatan diri tanpa bantuan.`;
+            container.appendChild(note);
+        }
     }
 }
 
@@ -232,7 +286,7 @@ function calculateScores() {
         const btns = document.querySelectorAll(`[data-id^="${prefix}"] .selected`);
         const groups = document.querySelectorAll(`[id^="${prefix}-section"] .question-group`);
         if (btns.length === groups.length && groups.length > 0) {
-            return Array.from(btns).reduce((sum, btn) => sum + parseInt(btn.parentElement.dataset.value), 0);
+            return Array.from(btns).reduce((sum, btn) => sum + parseInt(btn.closest('.question-group').dataset.value), 0);
         }
         return null;
     };
@@ -276,16 +330,10 @@ function calculateScores() {
         output += `Frailty (FRAIL): ${frail}/5 (${interp})\n`;
     }
 
-    const cfsBtns = document.querySelectorAll(`[data-id^="cfs-"] .selected`);
-    if (cfsBtns.length === 9) {
-        const cfsValues = Array.from(cfsBtns).map(btn => parseInt(btn.parentElement.dataset.value));
-        const cfs = Math.max(...cfsValues);
-        if (cfs > 0) {
-            const labels = ['Sangat Fit', 'Fit', 'Well', 'Vulnerable', 'Mildly Frail', 'Moderately Frail', 'Severely Frail', 'Very Severely Frail', 'Terminally Ill'];
-            output += `Frailty (CFS): ${cfs} (${labels[cfs-1]})\n`;
-        } else {
-            output += `Frailty (CFS): Inkonsisten (Pilih 'Ya' pada kategori yang paling sesuai)\n`;
-        }
+    const cfs = getScore('cfs');
+    if (cfs !== null) {
+        const labels = ['Sangat Fit', 'Fit', 'Well', 'Vulnerable', 'Mildly Frail', 'Moderately Frail', 'Severely Frail', 'Very Severely Frail', 'Terminally Ill'];
+        output += `Frailty (CFS): ${cfs} (${labels[cfs-1]})\n`;
     }
 
     const sar = getScore('sar');
