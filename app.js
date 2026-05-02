@@ -11,11 +11,30 @@ function toggleSection(header) {
 
 // 3. Selection Logic
 function selectOption(btn, value) {
-    const group = btn.parentElement;
-    Array.from(group.children).forEach(child => child.classList.remove('selected'));
+    const group = btn.closest('.question-group');
+    const optionsDiv = btn.parentElement;
+    Array.from(optionsDiv.children).forEach(child => child.classList.remove('selected'));
     btn.classList.add('selected');
     group.dataset.value = value;
-    updateSectionStatus(btn.closest('.section-content'));
+    
+    // Auto-fill logic for CFS
+    const section = btn.closest('.section-content');
+    if (section.id === 'cfs-section' && value > 0) {
+        // If "Ya" is selected, auto-select "Tidak" for subsequent questions
+        const groups = Array.from(section.querySelectorAll('.question-group'));
+        const currentIndex = groups.indexOf(group);
+        for (let i = currentIndex + 1; i < groups.length; i++) {
+            const nextGroup = groups[i];
+            const tidakBtn = Array.from(nextGroup.querySelectorAll('.option-btn')).find(b => b.textContent === 'Tidak');
+            if (tidakBtn) {
+                Array.from(tidakBtn.parentElement.children).forEach(child => child.classList.remove('selected'));
+                tidakBtn.classList.add('selected');
+                nextGroup.dataset.value = 0;
+            }
+        }
+    }
+    
+    updateSectionStatus(section);
 }
 
 function updateSectionStatus(section) {
@@ -52,16 +71,16 @@ const assessments = {
     'adl': {
         container: 'adl-section',
         questions: [
-            { text: 'Makan', options: [{t:'Bantuan penuh', v:0}, {t:'Perlu bantuan', v:1}, {t:'Mandiri', v:2}] },
-            { text: 'Mandi', options: [{t:'Bantuan penuh', v:0}, {t:'Mandiri', v:1}] },
-            { text: 'Perawatan diri', options: [{t:'Bantuan penuh', v:0}, {t:'Mandiri', v:1}] },
-            { text: 'Berpakaian', options: [{t:'Bantuan penuh', v:0}, {t:'Perlu bantuan', v:1}, {t:'Mandiri', v:2}] },
-            { text: 'BAB', options: [{t:'Inkontinensia', v:0}, {t:'Kadang inkontinensia', v:1}, {t:'Kontinen', v:2}] },
-            { text: 'BAK', options: [{t:'Inkontinensia', v:0}, {t:'Kadang inkontinensia', v:1}, {t:'Kontinen', v:2}] },
-            { text: 'Toileting', options: [{t:'Bantuan penuh', v:0}, {t:'Perlu bantuan', v:1}, {t:'Mandiri', v:2}] },
-            { text: 'Transfer (tempat tidur ke kursi)', options: [{t:'Bantuan penuh', v:0}, {t:'Perlu bantuan', v:1}, {t:'Sedikit bantuan', v:2}, {t:'Mandiri', v:3}] },
-            { text: 'Mobilitas (berjalan)', options: [{t:'Bisa dengan kursi roda', v:0}, {t:'Perlu bantuan', v:1}, {t:'Mandiri dengan alat bantu', v:2}, {t:'Mandiri', v:3}] },
-            { text: 'Naik tangga', options: [{t:'Tidak bisa', v:0}, {t:'Perlu bantuan', v:1}, {t:'Mandiri', v:2}] }
+            { text: 'Makan', options: [{t:'Bantuan penuh', v:0}, {t:'Perlu bantuan (potong lauk/oles)', v:1}, {t:'Mandiri', v:2}] },
+            { text: 'Mandi', options: [{t:'Butuh bantuan', v:0}, {t:'Mandiri', v:1}] },
+            { text: 'Perawatan diri', options: [{t:'Butuh bantuan', v:0}, {t:'Mandiri (cuci muka, sisir, dll)', v:1}] },
+            { text: 'Berpakaian', options: [{t:'Bantuan penuh', v:0}, {t:'Sebagian dibantu', v:1}, {t:'Mandiri', v:2}] },
+            { text: 'Buang Air Besar (BAB)', options: [{t:'Inkontinen', v:0}, {t:'Kadang inkontinen', v:1}, {t:'Kontinen', v:2}] },
+            { text: 'Buang Air Kecil (BAK)', options: [{t:'Inkontinen', v:0}, {t:'Kadang inkontinen', v:1}, {t:'Kontinen', v:2}] },
+            { text: 'Penggunaan Toilet', options: [{t:'Bantuan penuh', v:0}, {t:'Perlu bantuan', v:1}, {t:'Mandiri', v:2}] },
+            { text: 'Transfer (pindah tempat tidur ke kursi)', options: [{t:'Tidak mampu', v:0}, {t:'Banyak bantuan (2 orang)', v:1}, {t:'Sedikit bantuan (1 orang)', v:2}, {t:'Mandiri', v:3}] },
+            { text: 'Mobilitas (berjalan di permukaan datar)', options: [{t:'Tidak mampu', v:0}, {t:'Bisa dengan kursi roda', v:1}, {t:'Mandiri dengan alat bantu', v:2}, {t:'Mandiri', v:3}] },
+            { text: 'Naik Turun Tangga', options: [{t:'Tidak mampu', v:0}, {t:'Perlu bantuan', v:1}, {t:'Mandiri', v:2}] }
         ]
     },
     'iadl': {
@@ -126,11 +145,15 @@ const assessments = {
     'cfs': {
         container: 'cfs-section',
         questions: [
-            { text: 'Clinical Frailty Scale (CFS)', options: [
-                {t:'1 - Sangat Fit', v:1}, {t:'2 - Fit', v:2}, {t:'3 - Well', v:3}, 
-                {t:'4 - Vulnerable', v:4}, {t:'5 - Mildly Frail', v:5}, {t:'6 - Moderately Frail', v:6},
-                {t:'7 - Severely Frail', v:7}, {t:'8 - Very Severely Frail', v:8}, {t:'9 - Terminally Ill', v:9}
-            ]}
+            { text: 'Apakah lansia tersebut menderita penyakit terminal dengan harapan hidup < 6 bulan?', options: [{t:'Ya', v:9}, {t:'Tidak', v:0}] },
+            { text: 'Apakah lansia tersebut menderita ketergantungan total dan mendekati akhir hayat?', options: [{t:'Ya', v:8}, {t:'Tidak', v:0}] },
+            { text: 'Apakah lansia tersebut menderita ketergantungan total untuk perawatan diri (tidak mendekati akhir hayat)?', options: [{t:'Ya', v:7}, {t:'Tidak', v:0}] },
+            { text: 'Apakah lansia tersebut membutuhkan bantuan untuk aktivitas luar, merawat rumah dan/atau mandi?', options: [{t:'Ya', v:6}, {t:'Tidak', v:0}] },
+            { text: 'Apakah lansia tersebut membutuhkan bantuan IADL (menggunakan telepon, berbelanja, menyiapkan makanan, urusan rumah tangga, mencuci pakaian, penggunaan transportasi)?', options: [{t:'Ya', v:5}, {t:'Tidak', v:0}] },
+            { text: 'Walau lansia tidak bergantung pada orang lain, apakah gejala-gejala yang dialami lansia ini membatasi aktivitasnya?', options: [{t:'Ya', v:4}, {t:'Tidak', v:0}] },
+            { text: 'Apakah lansia tersebut memiliki masalah medis yang terkendali dengan baik, namun tidak aktif secara teratur selain berjalan kaki?', options: [{t:'Ya', v:3}, {t:'Tidak', v:0}] },
+            { text: 'Apakah lansia tersebut tidak mengalami gejala penyakit aktif, dan hanya latihan olahraga sesekali?', options: [{t:'Ya', v:2}, {t:'Tidak', v:0}] },
+            { text: 'Apakah lansia tersebut latihan olahraga teratur dan paling bugar di kelompok usianya?', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] }
         ]
     },
     'sar': {
@@ -146,14 +169,14 @@ const assessments = {
     'jatuh': {
         container: 'jatuh-section',
         questions: [
-            { text: 'Confusion, Disorientation, Impulsivity', options: [{t:'Ya', v:4}, {t:'Tidak', v:0}] },
-            { text: 'Symptomatic Depression', options: [{t:'Ya', v:2}, {t:'Tidak', v:0}] },
-            { text: 'Altered Elimination', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] },
-            { text: 'Dizziness, Vertigo', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] },
-            { text: 'Gender (Laki-laki)', options: [{t:'Laki-laki', v:1}, {t:'Perempuan', v:0}] },
-            { text: 'Antiepileptics', options: [{t:'Ya', v:2}, {t:'Tidak', v:0}] },
-            { text: 'Benzodiazepines', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] },
-            { text: 'Get-Up-and-Go Test', options: [{t:'Mandiri', v:0}, {t:'Perlu bantuan/dorongan', v:1}, {t:'Sangat sulit/tidak bisa', v:3}, {t:'Hanya duduk di tepi tempat tidur', v:4}] }
+            { text: 'Kebingungan, Disorientasi, Impulsivitas', options: [{t:'Ya', v:4}, {t:'Tidak', v:0}] },
+            { text: 'Depresi Simtomatik', options: [{t:'Ya', v:2}, {t:'Tidak', v:0}] },
+            { text: 'Perubahan Eliminasi (Mandiri ke Kamar Mandi)', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] },
+            { text: 'Pusing / Vertigo', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] },
+            { text: 'Jenis Kelamin (Laki-laki)', options: [{t:'Laki-laki', v:1}, {t:'Perempuan', v:0}] },
+            { text: 'Pemberian Antiepilepsi', options: [{t:'Ya', v:2}, {t:'Tidak', v:0}] },
+            { text: 'Pemberian Benzodiazepine', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] },
+            { text: 'Get-Up-and-Go Test', options: [{t:'Mandiri (bisa bangkit sekali coba)', v:0}, {t:'Perlu bantuan/dorongan', v:1}, {t:'Sangat sulit/tidak bisa tanpa bantuan', v:3}, {t:'Hanya duduk di tepi tempat tidur', v:4}] }
         ]
     },
     'braden': {
@@ -249,13 +272,20 @@ function calculateScores() {
         let interp = 'Frail';
         if (frail === 0) interp = 'Robust/Fit/Sehat';
         else if (frail <= 2) interp = 'Pre-frail';
+        else if (frail >= 3) interp = 'Frail (Rentan)';
         output += `Frailty (FRAIL): ${frail}/5 (${interp})\n`;
     }
 
-    const cfs = getScore('cfs');
-    if (cfs !== null) {
-        const labels = ['Sangat Fit', 'Fit', 'Well', 'Vulnerable', 'Mildly Frail', 'Moderately Frail', 'Severely Frail', 'Very Severely Frail', 'Terminally Ill'];
-        output += `Frailty (CFS): ${cfs} (${labels[cfs-1]})\n`;
+    const cfsBtns = document.querySelectorAll(`[data-id^="cfs-"] .selected`);
+    if (cfsBtns.length === 9) {
+        const cfsValues = Array.from(cfsBtns).map(btn => parseInt(btn.parentElement.dataset.value));
+        const cfs = Math.max(...cfsValues);
+        if (cfs > 0) {
+            const labels = ['Sangat Fit', 'Fit', 'Well', 'Vulnerable', 'Mildly Frail', 'Moderately Frail', 'Severely Frail', 'Very Severely Frail', 'Terminally Ill'];
+            output += `Frailty (CFS): ${cfs} (${labels[cfs-1]})\n`;
+        } else {
+            output += `Frailty (CFS): Inkonsisten (Pilih 'Ya' pada kategori yang paling sesuai)\n`;
+        }
     }
 
     const sar = getScore('sar');
