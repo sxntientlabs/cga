@@ -38,11 +38,10 @@ header {
     margin-bottom: 30px;
 }
 
-header h1 {
-    font-size: 3rem;
-    color: var(--primary-navy);
-    font-weight: 800;
-    letter-spacing: -1px;
+.header-logo {
+    max-width: 200px;
+    height: auto;
+    filter: drop-shadow(var(--shadow));
 }
 
 .section-card {
