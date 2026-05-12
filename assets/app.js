@@ -724,16 +724,15 @@ function renderAiMessages(){
 }
 const aiNudgeTexts = ['Ask me!', 'I’m your tutor!', 'Butuh bantuan?', 'Tanya materi di sini'];
 let aiNudgeTimer = null;
+function showAiNudge(){
+  if (state.aiOpen) return;
+  state.aiNudge = aiNudgeTexts[Math.floor(Math.random() * aiNudgeTexts.length)];
+  renderAiFloat();
+  setTimeout(() => { state.aiNudge = false; renderAiFloat(); }, 9000);
+}
 function scheduleAiNudge(){
   clearTimeout(aiNudgeTimer);
-  aiNudgeTimer = setTimeout(() => {
-    if (!state.aiOpen) {
-      state.aiNudge = aiNudgeTexts[Math.floor(Math.random() * aiNudgeTexts.length)];
-      renderAiFloat();
-      setTimeout(() => { state.aiNudge = false; renderAiFloat(); }, 9000);
-    }
-    scheduleAiNudge();
-  }, 180000);
+  aiNudgeTimer = setTimeout(() => { showAiNudge(); scheduleAiNudge(); }, 120000);
 }
 function resetAiNudge(){ if (state.aiNudge) { state.aiNudge = false; renderAiFloat(); } scheduleAiNudge(); }
 function resetAiNudgeOnActivity(e){ if (e?.target?.closest?.('#aiFloat')) return; resetAiNudge(); }
@@ -1034,13 +1033,15 @@ async function init(){
     const float = document.getElementById('aiFloat');
     if (!handle || !float || (e.target.closest('button,textarea,a') && !e.target.closest('[data-ai-toggle]'))) return;
     const startX = e.clientX, startY = e.clientY;
+    let moved = false;
     const rect = float.getBoundingClientRect();
     const startRight = window.innerWidth - rect.right, startBottom = window.innerHeight - rect.bottom;
     const move = ev => {
+      if (Math.abs(ev.clientX - startX) + Math.abs(ev.clientY - startY) > 8) moved = true;
       state.aiPos = {right: Math.max(8, startRight - (ev.clientX - startX)), bottom: Math.max(8, startBottom - (ev.clientY - startY))};
       float.style.right = `${state.aiPos.right}px`; float.style.bottom = `${state.aiPos.bottom}px`;
     };
-    const up = () => { setStorage(); document.removeEventListener('pointermove', move); document.removeEventListener('pointerup', up); };
+    const up = () => { setStorage(); if (moved) setTimeout(showAiNudge, 120); document.removeEventListener('pointermove', move); document.removeEventListener('pointerup', up); };
     document.addEventListener('pointermove', move); document.addEventListener('pointerup', up);
   });
   document.addEventListener('click', e => {
