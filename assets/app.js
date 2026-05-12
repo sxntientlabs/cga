@@ -173,6 +173,17 @@ function summaryFromBlocks(blocks){
   }
   return t.join(' ').replace(/\s+/g,' ').trim();
 }
+function blocksSearchText(blocks){
+  const buf = [];
+  for (const blk of normalizeBlocks(blocks)) {
+    if (blk.type === 'table') normalizeSections(blk.rows).forEach(row => buf.push(...normalizeSections(row)));
+    else if (blk.text) buf.push(blk.text);
+  }
+  return buf.join(' ');
+}
+function sectionSearchText(sec){
+  return [sec.title, sec.display, sec.searchText, blocksSearchText(sec.blocks)].filter(Boolean).join(' ');
+}
 function topicSearchText(topic){
   const buf = [topic.title, topic.display, topic.partTitle];
   for (const blk of topic.intro || []) {
@@ -206,30 +217,37 @@ function scoreMatch(text, q){
 }
 function resourcePageUrl(pageSlug){ return pageSlug === 'cga-brillian' ? '#resource/cga-brillian' : `#resource/${pageSlug}`; }
 function sectionLabel(count){ return count > 0 ? `${count} section${count === 1 ? '' : 's'}` : 'Reference page'; }
+function titleBoost(title, query){
+  const t = norm(title);
+  if (!query || !t) return 0;
+  if (t === query) return 2000;
+  if (t.includes(query)) return 900;
+  return 0;
+}
 function searchAll(q){
   const query = norm(q);
   if (!query) return [];
   const results = [];
   for (const part of allModules()) {
     const partScore = scoreMatch(part.display + ' ' + part.title, query);
-    if (partScore) results.push({type:'module', score: partScore, title: part.display, subtitle: `${part.topics.length} topics`, href:`#part/${part.slug}`});
+    if (partScore) results.push({type:'module', score: partScore + titleBoost(part.display, query), title: part.display, subtitle: `${part.topics.length} topics`, href:`#part/${part.slug}`});
     for (const topic of part.topics) {
       const text = topicSearchText({...topic, partTitle: part.display});
       const topicScore = scoreMatch(topic.display + ' ' + topic.title + ' ' + text, query);
-      if (topicScore) results.push({type:'topic', score: topicScore + 10, title: topic.display, subtitle: `${part.display} · ${topic.sections[0]?.title || 'Open topic'}`, href:`#topic/${topic.slug}`});
+      if (topicScore) results.push({type:'topic', score: topicScore + 10 + titleBoost(`${topic.display} ${topic.title}`, query), title: topic.display, subtitle: `${part.display} · ${topic.sections[0]?.title || 'Open topic'}`, href:`#topic/${topic.slug}`});
       for (const sec of topic.sections) {
-        const secText = [sec.title, summaryFromBlocks(sec.blocks)].join(' ');
+        const secText = sectionSearchText(sec);
         const secScore = scoreMatch(secText, query);
-        if (secScore) results.push({type:'section', score: secScore + 20, title: sec.title, subtitle: `${topic.display} · ${part.display}`, href:`#topic/${topic.slug}#sec-${sec.slug}`});
+        if (secScore) results.push({type:'section', score: secScore + 20 + titleBoost(sec.title, query), title: sec.title, subtitle: `${topic.display} · ${part.display}`, href:`#topic/${topic.slug}#sec-${sec.slug}`});
       }
     }
   }
   for (const page of allResources()) {
     const pageScore = scoreMatch([page.display, page.title, page.searchText].filter(Boolean).join(' '), query);
-    if (pageScore) results.push({type:'resource', score: pageScore, title: safeText(page.display, page.title || 'Resource'), subtitle: sectionLabel(normalizeSections(page.sections).length), href:resourcePageUrl(page.slug)});
+    if (pageScore) results.push({type:'resource', score: pageScore + titleBoost(`${page.display} ${page.title}`, query), title: safeText(page.display, page.title || 'Resource'), subtitle: sectionLabel(normalizeSections(page.sections).length), href:resourcePageUrl(page.slug)});
     for (const sec of normalizeSections(page.sections)) {
-      const secScore = scoreMatch([sec.title, sec.display, sec.searchText || ''].join(' '), query);
-      if (secScore) results.push({type:'resource section', score: secScore + 10, title: safeText(sec.display, sec.title || 'Section'), subtitle: safeText(page.display, 'Resource'), href:`#resource/${page.slug}#sec-${sec.slug}`});
+      const secScore = scoreMatch(sectionSearchText(sec), query);
+      if (secScore) results.push({type:'resource section', score: secScore + 10 + titleBoost(`${sec.display} ${sec.title}`, query), title: safeText(sec.display, sec.title || 'Section'), subtitle: safeText(page.display, 'Resource'), href:`#resource/${page.slug}#sec-${sec.slug}`});
     }
   }
   return results.sort((a,b) => b.score - a.score).slice(0, 30);
@@ -284,6 +302,12 @@ function renderBlocks(blocks){
   }
   flush();
   return html;
+}
+function openSearchHit(hit){
+  if (!hit) return;
+  state.search = '';
+  syncSearchInputs('');
+  location.hash = hit.href;
 }
 function renderSearchResults(q){
   const results = searchAll(q);
@@ -654,19 +678,19 @@ function render(){
   els.modeReview.classList.toggle('active', state.mode === 'review');
   if (els.modeCga) els.modeCga.classList.toggle('active', route.type === 'resource' && route.slug === 'cga-brillian');
   const q = state.search.trim();
+  if (q.length >= 2) {
+    els.crumbs.textContent = 'Search';
+    els.pageTitle.textContent = 'Search results';
+    els.pageSubtitle.textContent = `Smart search for “${q}”`;
+    els.content.innerHTML = renderSearchResults(q);
+    bindHomeCards();
+    return;
+  }
   if (route.type === 'topic') return renderTopic(route.slug);
   if (route.type === 'resource') return renderResource(route.slug);
   if (route.type === 'part') return renderPart(route.slug);
   if (route.type === 'home' && state.mode === 'review') return renderReview();
   if (route.type === 'home' && state.mode === 'study') return renderStudy();
-  if (q.length >= 2) {
-    els.crumbs.textContent = 'Search';
-    els.pageTitle.textContent = 'Search results';
-    els.pageSubtitle.textContent = `Smart search for “${q}”`;
-    els.content.innerHTML = renderSearchResults(q) + renderHomeBody();
-    bindHomeCards();
-    return;
-  }
   return renderHome();
 }
 function renderHomeBody(){
@@ -793,14 +817,14 @@ async function init(){
   if (els.mobileSearch) els.mobileSearch.addEventListener('input', e => onSearch(e.target.value));
   els.search.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
-      const hit = searchAll(state.search.trim())[0];
-      if (hit) location.hash = hit.href;
+      e.preventDefault();
+      openSearchHit(searchAll(state.search.trim())[0]);
     }
   });
   if (els.mobileSearch) els.mobileSearch.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
-      const hit = searchAll(state.search.trim())[0];
-      if (hit) location.hash = hit.href;
+      e.preventDefault();
+      openSearchHit(searchAll(state.search.trim())[0]);
     }
   });
   els.modeFocus.onclick = () => { state.focus = !state.focus; setStorage(); setFocus(); };
@@ -817,12 +841,26 @@ async function init(){
   if (els.mobileCga) els.mobileCga.onclick = () => { state.mode = 'home'; location.hash = '#resource/cga-brillian'; };
   if (els.mobileTheme) els.mobileTheme.onclick = () => { state.theme = state.theme === 'dark' ? 'light' : 'dark'; setStorage(); setTheme(); };
   if (els.mobileThemeInline) els.mobileThemeInline.onclick = () => { state.theme = state.theme === 'dark' ? 'light' : 'dark'; setStorage(); setTheme(); };
+  if (els.content) els.content.addEventListener('click', e => {
+    const hit = e.target.closest('.search-hit');
+    if (hit) {
+      e.preventDefault();
+      state.search = '';
+      syncSearchInputs('');
+      location.hash = hit.getAttribute('href') || '#home';
+      if (location.hash === hit.getAttribute('href')) render();
+    }
+  });
   if (els.nav) els.nav.addEventListener('click', e => {
     const link = e.target.closest('a');
-    if (link && window.matchMedia('(max-width: 720px)').matches) {
-      state.sidebarOpen = false;
-      setStorage();
-      setSidebar();
+    if (link) {
+      state.search = '';
+      syncSearchInputs('');
+      if (window.matchMedia('(max-width: 720px)').matches) {
+        state.sidebarOpen = false;
+        setStorage();
+        setSidebar();
+      }
     }
   });
   window.addEventListener('hashchange', setRoute);
