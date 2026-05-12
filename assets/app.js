@@ -91,8 +91,19 @@ function setFocus(){
 function setSidebar(){
   document.body.classList.toggle('sidebar-open', !!state.sidebarOpen);
 }
+function goHomeMode(mode){
+  state.mode = mode;
+  state.sidebarOpen = false;
+  setStorage();
+  setSidebar();
+  if (location.hash !== '#home') location.hash = '#home';
+  else render();
+}
 function setRoute(){
   state.route = location.hash.replace(/^#/, '') || 'home';
+  state.sidebarOpen = false;
+  setStorage();
+  setSidebar();
   render();
 }
 function parseRoute(){
@@ -525,6 +536,24 @@ function renderReview(){
     <div class="toolbar">${pendingTopics.map(t => `<a class="badge" href="#topic/${t.slug}">${esc(t.display)}</a>`).join('') || '<div class="empty">Semua topik sudah selesai 🎉</div>'}</div>
   `;
 }
+function renderStudy(){
+  els.crumbs.textContent = 'Study';
+  els.pageTitle.textContent = 'Study mode';
+  els.pageSubtitle.textContent = 'Fokus ke materi yang paling perlu dilanjutkan.';
+  els.content.innerHTML = `
+    <div class="card pad" style="margin-bottom:18px">
+      <span class="badge">Study mode</span>
+      <h3 style="margin:10px 0 8px">Belajar terarah, tanpa lompat-lompat.</h3>
+      <div class="note">Gunakan sidebar untuk loncat ke module, lalu buka topic satu per satu dari home.</div>
+      <div class="toolbar" style="margin-top:14px">
+        <a class="btn primary" href="#home">Back to home</a>
+        <a class="btn" href="#resource/cga-brillian">Open CGA</a>
+      </div>
+    </div>
+    ${renderHomeBody()}
+  `;
+  bindHomeCards();
+}
 function renderNotFound(){
   els.crumbs.textContent = 'Not found';
   els.pageTitle.textContent = 'Page not found';
@@ -547,6 +576,7 @@ function render(){
   if (route.type === 'resource') return renderResource(route.slug);
   if (route.type === 'part') return renderPart(route.slug);
   if (route.type === 'home' && state.mode === 'review') return renderReview();
+  if (route.type === 'home' && state.mode === 'study') return renderStudy();
   if (q.length >= 2) {
     els.crumbs.textContent = 'Search';
     els.pageTitle.textContent = 'Search results';
@@ -646,9 +676,9 @@ async function init(){
   });
   els.modeFocus.onclick = () => { state.focus = !state.focus; setStorage(); setFocus(); };
   els.modeTheme.onclick = () => { state.theme = state.theme === 'dark' ? 'light' : 'dark'; setStorage(); setTheme(); };
-  els.modeHome.onclick = () => { state.mode = 'home'; render(); };
-  els.modeStudy.onclick = () => { state.mode = 'study'; render(); };
-  els.modeReview.onclick = () => { state.mode = 'review'; render(); };
+  els.modeHome.onclick = () => goHomeMode('home');
+  els.modeStudy.onclick = () => goHomeMode('study');
+  els.modeReview.onclick = () => goHomeMode('review');
   if (els.modeCga) els.modeCga.onclick = () => { state.mode = 'home'; location.hash = '#resource/cga-brillian'; };
   if (els.sidebarToggle) els.sidebarToggle.onclick = () => { state.sidebarOpen = !state.sidebarOpen; setStorage(); setSidebar(); };
   if (els.sidebarBackdrop) els.sidebarBackdrop.onclick = () => { state.sidebarOpen = false; setStorage(); setSidebar(); };
