@@ -96,11 +96,17 @@ function setFocus(){
   if (els.modeFocus) els.modeFocus.classList.toggle('active', !!state.focus);
 }
 function setSidebar(){
-  document.body.classList.toggle('sidebar-open', !!state.sidebarOpen);
-  if (els.nav?.closest('.sidebar')) {
-    els.nav.closest('.sidebar').classList.toggle('is-open', !!state.sidebarOpen);
+  const mobile = window.matchMedia('(max-width: 720px)').matches;
+  const open = mobile ? false : !!state.sidebarOpen;
+  if (mobile && state.sidebarOpen) {
+    state.sidebarOpen = false;
+    localStorage.setItem('im-sidebar-open', 'false');
   }
-  if (els.sidebarBackdrop) els.sidebarBackdrop.classList.toggle('is-open', !!state.sidebarOpen);
+  document.body.classList.toggle('sidebar-open', open);
+  if (els.nav?.closest('.sidebar')) {
+    els.nav.closest('.sidebar').classList.toggle('is-open', open);
+  }
+  if (els.sidebarBackdrop) els.sidebarBackdrop.classList.toggle('is-open', open);
 }
 function goHomeMode(mode){
   state.mode = mode;
