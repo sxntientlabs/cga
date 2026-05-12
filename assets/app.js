@@ -755,7 +755,7 @@ function renderAiFloat(){
       <header class="ai-panel-head" data-ai-drag><div><strong>AI Tutor</strong><span>IPD Brillian KB</span></div><button type="button" data-ai-close>×</button></header>
       <div class="ai-disclaimer">Edukasi. Jangan masukkan data pasien identifikatif.</div>
       <div id="aiMessages" class="ai-messages">${renderAiMessages()}</div>
-      <div class="ai-quick"><button type="button" data-ai-prompt="Jelaskan topic/materi ini dengan poin high-yield, patofisiologi singkat, diagnosis, tatalaksana, red flags, dan ringkasan praktis.">Explain</button><button type="button" data-ai-prompt="Buat 5 pertanyaan quiz dari materi ini. Sertakan opsi jawaban, kunci, dan penjelasan singkat tiap nomor.">Quiz</button><button type="button" data-ai-prompt="Ringkas materi ini menjadi bullet point klinis: definisi, diagnosis, tatalaksana, red flags, dan pitfall penting.">Summarize</button><button class="ai-web-toggle ${state.aiWebSearch ? 'active' : ''}" type="button" data-ai-web>Web ${state.aiWebSearch ? 'ON' : 'OFF'}</button></div>
+      <div class="ai-quick"><button type="button" data-ai-prompt="Jelaskan topic/materi ini dengan poin high-yield, patofisiologi singkat, diagnosis, tatalaksana, red flags, dan ringkasan praktis.">Explain</button><button type="button" data-ai-prompt="Buat 5 pertanyaan quiz dari materi ini. Sertakan opsi jawaban, kunci, dan penjelasan singkat tiap nomor.">Quiz</button><button type="button" data-ai-prompt="Ringkas materi ini menjadi bullet point klinis: definisi, diagnosis, tatalaksana, red flags, dan pitfall penting.">Summarize</button><button class="ai-web-toggle ${state.aiWebSearch ? 'active' : ''}" type="button" data-ai-web>Search ${state.aiWebSearch ? 'ON' : 'OFF'}</button></div>
       <form id="aiForm" class="ai-form"><textarea id="aiInput" rows="2" placeholder="Tanya AI Tutor..."></textarea><div class="toolbar ai-actions"><button class="btn primary" type="submit">Ask</button><button class="btn" type="button" data-ai-clear>Clear</button></div></form>
     </section>`;
   document.body.appendChild(box);
@@ -801,7 +801,7 @@ async function submitAiTutor(text){
     const sources = aiLocalSources(message);
     const sourceText = sources.map(s => `[${s.id}] ${s.title} — ${s.section}\nURL: ${s.url}\n${s.text}`).join('\n\n');
     const messages = [
-      {role:'system', content:`You are AI Tutor for IPD Brillian. Answer in Indonesian. ${state.aiWebSearch ? 'Use local guide sources first, then web search if needed for newer/outside references. Cite sources clearly.' : 'Use ONLY supplied local guide sources. Cite claims with [1], [2]. If insufficient, say source is insufficient.'} Educational use only, not patient-specific medical advice. Be structured and concise.`},
+      {role:'system', content:`You are AI Tutor for IPD Brillian. Answer in Indonesian. ${state.aiWebSearch ? 'Use local guide sources first. If the answer is not available or insufficient in local sources, activate/use web search and cite external references clearly.' : 'Use ONLY supplied local guide sources. Cite claims with [1], [2]. If insufficient, say source is insufficient.'} Educational use only, not patient-specific medical advice. Be structured and concise.`},
       ...state.aiHistory.filter(m => m.content !== 'Thinking...').slice(-8).map(m => ({role:m.role, content:m.content.slice(0,1200)})),
       {role:'user', content:`Question: ${message}\n\nLocal guide sources:\n${sourceText}\n\nFormat: Jawaban singkat, Penjelasan, Sources used.`}
     ];
