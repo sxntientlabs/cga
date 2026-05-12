@@ -754,9 +754,8 @@ function renderAiFloat(){
     <section class="ai-panel card">
       <header class="ai-panel-head" data-ai-drag><div><strong>AI Tutor</strong><span>IPD Brillian KB</span></div><button type="button" data-ai-close>×</button></header>
       <div class="ai-disclaimer">Edukasi. Jangan masukkan data pasien identifikatif.</div>
-      <div class="ai-tools"><button class="ai-web-toggle ${state.aiWebSearch ? 'active' : ''}" type="button" data-ai-web>Web search ${state.aiWebSearch ? 'ON' : 'OFF'}</button></div>
       <div id="aiMessages" class="ai-messages">${renderAiMessages()}</div>
-      <div class="ai-quick"><button type="button" data-ai-prompt="Jelaskan topic/materi ini dengan poin high-yield, patofisiologi singkat, diagnosis, tatalaksana, red flags, dan ringkasan praktis.">Explain</button><button type="button" data-ai-prompt="Buat 5 pertanyaan quiz dari materi ini. Sertakan opsi jawaban, kunci, dan penjelasan singkat tiap nomor.">Quiz</button><button type="button" data-ai-prompt="Ringkas materi ini menjadi bullet point klinis: definisi, diagnosis, tatalaksana, red flags, dan pitfall penting.">Summarize</button></div>
+      <div class="ai-quick"><button type="button" data-ai-prompt="Jelaskan topic/materi ini dengan poin high-yield, patofisiologi singkat, diagnosis, tatalaksana, red flags, dan ringkasan praktis.">Explain</button><button type="button" data-ai-prompt="Buat 5 pertanyaan quiz dari materi ini. Sertakan opsi jawaban, kunci, dan penjelasan singkat tiap nomor.">Quiz</button><button type="button" data-ai-prompt="Ringkas materi ini menjadi bullet point klinis: definisi, diagnosis, tatalaksana, red flags, dan pitfall penting.">Summarize</button><button class="ai-web-toggle ${state.aiWebSearch ? 'active' : ''}" type="button" data-ai-web>Web ${state.aiWebSearch ? 'ON' : 'OFF'}</button></div>
       <form id="aiForm" class="ai-form"><textarea id="aiInput" rows="2" placeholder="Tanya AI Tutor..."></textarea><div class="toolbar ai-actions"><button class="btn primary" type="submit">Ask</button><button class="btn" type="button" data-ai-clear>Clear</button></div></form>
     </section>`;
   document.body.appendChild(box);
