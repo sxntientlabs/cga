@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Internal Medicine Wiki LMS</title>
+  <link rel="stylesheet" href="./assets/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">IM</div>
+        <div>
+          <div class="brand-title">Internal Medicine</div>
+          <div class="brand-sub">Wiki • LMS • Review</div>
+        </div>
+      </div>
+      <input id="search" class="search" type="search" placeholder="Cari topic, diagnosis, obat..." />
+      <div class="sidebar-meta">
+        <div class="meta-card">
+          <span>Progress</span>
+          <strong id="progressLabel">0%</strong>
+          <div class="progress"><div id="progressBar"></div></div>
+        </div>
+        <div class="meta-card compact">
+          <span>Bookmarked</span>
+          <strong id="bookmarkCount">0</strong>
+        </div>
+      </div>
+      <nav id="nav"></nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <div id="crumbs" class="crumbs">Home</div>
+          <h1 id="pageTitle">Internal Medicine Wiki LMS</h1>
+          <p id="pageSubtitle">Belajar lebih enak: rapi, searchable, dan bisa tracking progress.</p>
+        </div>
+        <div class="top-actions">
+          <button id="modeHome" class="chip active">Home</button>
+          <button id="modeStudy" class="chip">Study</button>
+          <button id="modeReview" class="chip">Review</button>
+          <button id="modeFocus" class="chip">Focus</button>
+          <button id="modeTheme" class="chip theme-chip" aria-label="Toggle theme"></button>
+        </div>
+      </header>
+      <section id="content" class="content"></section>
+    </main>
+  </div>
+  <footer class="site-credit">developed by @rafaellrm_ &amp; @josia.nathanaell</footer>
+  <script src="./assets/app.js"></script>
+</body>
+</html>

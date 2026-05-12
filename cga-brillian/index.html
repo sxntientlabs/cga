@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CGA Brillian | Internal Medicine Wiki LMS</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="logo.png" alt="CGAbrillian Logo" class="header-logo">
+        </header>
+
+        <!-- 1. Tanggal Pemeriksaan -->
+        <div class="section-card">
+            <div class="section-header teal" onclick="toggleSection(this)">
+                <span>Tanggal Pemeriksaan</span>
+            </div>
+            <div class="section-content active">
+                <div class="question-group">
+                    <div class="question-text">Tanggal Pemeriksaan</div>
+                    <input type="date" id="exam-date" class="date-input">
+                </div>
+            </div>
+        </div>
+
+        <!-- Assessment Sections (Rendered by JS) -->
+        <div id="assessment-containers">
+            <!-- ISAR -->
+            <div class="section-card">
+                <div class="section-header navy" onclick="toggleSection(this)">
+                    <span>ISAR (Identifikasi Pasien Geriatri Berisiko)</span>
+                    <span class="status-label" id="isar-status">Belum lengkap</span>
+                </div>
+                <div class="section-content" id="isar-section"></div>
+            </div>
+
+            <!-- ADL Barthel -->
+            <div class="section-card">
+                <div class="section-header teal" onclick="toggleSection(this)">
+                    <span>Status Fungsional - ADL Barthel</span>
+                    <span class="status-label" id="adl-status">Belum lengkap</span>
+                </div>
+                <div class="section-content" id="adl-section"></div>
+            </div>
+
+            <!-- IADL Lawton -->
+            <div class="section-card">
+                <div class="section-header navy" onclick="toggleSection(this)">
+                    <span>Status Fungsional - IADL Lawton</span>
+                    <span class="status-label" id="iadl-status">Belum lengkap</span>
+                </div>
+                <div class="section-content" id="iadl-section"></div>
+            </div>
+
+            <!-- AMT -->
+            <div class="section-card">
+                <div class="section-header teal" onclick="toggleSection(this)">
+                    <span>Status Mental - Abbreviated Mental Test (AMT)</span>
+                    <span class="status-label" id="amt-status">Belum lengkap</span>
+                </div>
+                <div class="section-content" id="amt-section"></div>
+            </div>
+
+            <!-- GDS-5 -->
+            <div class="section-card">
+                <div class="section-header navy" onclick="toggleSection(this)">
+                    <span>Status Mental - 5-Item Geriatric Depression Scale (GDS-5)</span>
+                    <span class="status-label" id="gds-status">Belum lengkap</span>
+                </div>
+                <div class="section-content" id="gds-section"></div>
+            </div>
+
+            <!-- MNA-SF -->
+            <div class="section-card">
+                <div class="section-header teal" onclick="toggleSection(this)">
+                    <span>Status Nutrisi - Mini Nutritional Assessment (MNA-SF)</span>
+                    <span class="status-label" id="mna-status">Belum lengkap</span>
+                </div>
+                <div class="section-content" id="mna-section"></div>
+            </div>
+
+            <!-- FRAIL -->
+            <div class="section-card">
+                <div class="section-header navy" onclick="toggleSection(this)">
+                    <span>Status Frailty - FRAIL</span>
+                    <span class="status-label" id="frail-status">Belum lengkap</span>
+                </div>
+                <div class="section-content" id="frail-section"></div>
+            </div>
+
+            <!-- CFS -->
+            <div class="section-card">
+                <div class="section-header teal" onclick="toggleSection(this)">
+                    <span>Status Frailty - Clinical Frailty Scale (CFS)</span>
+                    <span class="status-label" id="cfs-status">Belum lengkap</span>
+                </div>
+                <div class="section-content" id="cfs-section"></div>
+            </div>
+
+            <!-- SARC-F -->
+            <div class="section-card">
+                <div class="section-header navy" onclick="toggleSection(this)">
+                    <span>Status Sarcopenia - SARC-F</span>
+                    <span class="status-label" id="sar-status">Belum lengkap</span>
+                </div>
+                <div class="section-content" id="sar-section"></div>
+            </div>
+
+            <!-- Hendrich II -->
+            <div class="section-card">
+                <div class="section-header teal" onclick="toggleSection(this)">
+                    <span>Risiko Jatuh - Hendrich II Fall Risk Model</span>
+                    <span class="status-label" id="jatuh-status">Belum lengkap</span>
+                </div>
+                <div class="section-content" id="jatuh-section"></div>
+            </div>
+
+            <!-- Braden Scale -->
+            <div class="section-card">
+                <div class="section-header navy" onclick="toggleSection(this)">
+                    <span>Skala Braden (Braden Scale)</span>
+                    <span class="status-label" id="braden-status">Belum lengkap</span>
+                </div>
+                <div class="section-content" id="braden-section"></div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="calculateScores()">Hitung Skor</button>
+            <button class="btn btn-danger" onclick="resetForm()">Reset</button>
+            <button class="btn btn-secondary" onclick="copyResults()">Salin Hasil</button>
+        </div>
+
+        <!-- Results Area -->
+        <div id="results" class="results-area">Hasil akan muncul di sini...</div>
+
+
+
+        <footer>
+            developed by @rafaellrm_
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
