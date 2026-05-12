@@ -29,6 +29,12 @@ const els = {
   modeTheme: document.getElementById('modeTheme'),
   sidebarToggle: document.getElementById('sidebarToggle'),
   sidebarBackdrop: document.getElementById('sidebarBackdrop'),
+  mobileSearch: document.getElementById('mobileSearch'),
+  mobileHome: document.getElementById('mobileHome'),
+  mobileStudy: document.getElementById('mobileStudy'),
+  mobileReview: document.getElementById('mobileReview'),
+  mobileCga: document.getElementById('mobileCga'),
+  mobileTheme: document.getElementById('mobileTheme'),
 };
 
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
@@ -90,6 +96,9 @@ function setTheme(){
     els.modeTheme.setAttribute('aria-label', state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
     els.modeTheme.title = state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
   }
+  if (els.mobileTheme) {
+    els.mobileTheme.innerHTML = state.theme === 'dark' ? '<span aria-hidden="true">☀</span>' : '<span aria-hidden="true">☾</span>';
+  }
 }
 function setFocus(){
   document.body.classList.toggle('focus-mode', !!state.focus);
@@ -107,6 +116,19 @@ function setSidebar(){
     els.nav.closest('.sidebar').classList.toggle('is-open', open);
   }
   if (els.sidebarBackdrop) els.sidebarBackdrop.classList.toggle('is-open', open);
+}
+function setMobileDock(){
+  const route = parseRoute();
+  const activeResource = route.type === 'resource' && route.slug === 'cga-brillian';
+  const toggle = (el, active) => { if (el) el.classList.toggle('active', !!active); };
+  toggle(els.mobileHome, state.mode === 'home' && !activeResource);
+  toggle(els.mobileStudy, state.mode === 'study');
+  toggle(els.mobileReview, state.mode === 'review');
+  toggle(els.mobileCga, activeResource);
+}
+function syncSearchInputs(value){
+  if (els.search && els.search.value !== value) els.search.value = value;
+  if (els.mobileSearch && els.mobileSearch.value !== value) els.mobileSearch.value = value;
 }
 function goHomeMode(mode){
   state.mode = mode;
@@ -582,6 +604,7 @@ function render(){
   setTheme();
   setFocus();
   setSidebar();
+  setMobileDock();
   renderNav();
   const route = parseRoute();
   els.modeHome.classList.toggle('active', state.mode === 'home');
@@ -661,6 +684,32 @@ function renderHomeBody(){
       <div class="toolbar">${recent.map(t => `<a class="badge" href="#topic/${t.slug}">${esc(safeText(t.display, 'Topic'))}</a>`).join('')}</div>
     </div>`;
 }
+function renderHomeBodyMobile(){
+  const topics = allTopics();
+  const next = topics.find(t => !state.done.has(topicKey(t.partSlug, t.slug))) || topics[0] || {slug:'home'};
+  return `
+    <div class="hero-grid mobile-home-grid">
+      <div class="card hero pad">
+        <span class="badge">Wiki style · LMS friendly</span>
+        <h2>Belajar medicine lebih ringkas.</h2>
+        <div class="stat-row mobile-stat-row">
+          <div class="stat"><span>Modules</span><strong>${state.data.stats.modules}</strong></div>
+          <div class="stat"><span>Topics</span><strong>${state.data.stats.topics}</strong></div>
+          <div class="stat"><span>Done</span><strong>${topicDoneCount()}</strong></div>
+          <div class="stat"><span>Bookmarked</span><strong>${state.bookmarks.size}</strong></div>
+        </div>
+      </div>
+      <div class="card pad mobile-quick-card">
+        <h3 style="margin-top:0">Continue</h3>
+        <div class="toolbar">
+          <a class="btn primary" href="#topic/${next.slug}">Start / Continue</a>
+          <a class="btn" href="#resource/cga-brillian">Open CGA</a>
+        </div>
+        <div class="note">Search atau pakai dock di bawah buat pindah cepat.</div>
+      </div>
+    </div>
+    `;
+}
 function bindHomeCards(){
   document.querySelectorAll('[data-href]').forEach(el => el.onclick = () => {
     location.hash = el.dataset.href || '#home';
@@ -673,7 +722,9 @@ function renderHome(){
   els.crumbs.textContent = 'Home';
   els.pageTitle.textContent = 'IPD Brillian';
   els.pageSubtitle.textContent = 'Belajar lebih enak: rapi, searchable, dan bisa tracking progress.';
-  els.content.innerHTML = state.search.trim().length >= 2 ? renderSearchResults(state.search.trim()) + renderHomeBody() : renderHomeBody();
+  const mobile = window.matchMedia('(max-width: 720px)').matches;
+  const body = mobile ? renderHomeBodyMobile() : renderHomeBody();
+  els.content.innerHTML = state.search.trim().length >= 2 ? renderSearchResults(state.search.trim()) + body : body;
   bindHomeCards();
 }
 
@@ -684,8 +735,16 @@ async function init(){
     state.data = await res.json();
   }
   state.data = normalizeData(state.data);
-  els.search.addEventListener('input', e => { state.search = e.target.value; render(); });
+  const onSearch = value => { state.search = value; syncSearchInputs(value); render(); };
+  els.search.addEventListener('input', e => onSearch(e.target.value));
+  if (els.mobileSearch) els.mobileSearch.addEventListener('input', e => onSearch(e.target.value));
   els.search.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const hit = searchAll(state.search.trim())[0];
+      if (hit) location.hash = hit.href;
+    }
+  });
+  if (els.mobileSearch) els.mobileSearch.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       const hit = searchAll(state.search.trim())[0];
       if (hit) location.hash = hit.href;
@@ -699,6 +758,11 @@ async function init(){
   if (els.modeCga) els.modeCga.onclick = () => { state.mode = 'home'; location.hash = '#resource/cga-brillian'; };
   if (els.sidebarToggle) els.sidebarToggle.onclick = () => { state.sidebarOpen = !state.sidebarOpen; setStorage(); setSidebar(); };
   if (els.sidebarBackdrop) els.sidebarBackdrop.onclick = () => { state.sidebarOpen = false; setStorage(); setSidebar(); };
+  if (els.mobileHome) els.mobileHome.onclick = () => goHomeMode('home');
+  if (els.mobileStudy) els.mobileStudy.onclick = () => goHomeMode('study');
+  if (els.mobileReview) els.mobileReview.onclick = () => goHomeMode('review');
+  if (els.mobileCga) els.mobileCga.onclick = () => { state.mode = 'home'; location.hash = '#resource/cga-brillian'; };
+  if (els.mobileTheme) els.mobileTheme.onclick = () => { state.theme = state.theme === 'dark' ? 'light' : 'dark'; setStorage(); setTheme(); };
   if (els.nav) els.nav.addEventListener('click', e => {
     const link = e.target.closest('a');
     if (link && window.matchMedia('(max-width: 720px)').matches) {
@@ -710,6 +774,7 @@ async function init(){
   window.addEventListener('hashchange', setRoute);
   setTheme();
   setFocus();
+  syncSearchInputs(state.search);
   setRoute();
 }
 
