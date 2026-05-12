@@ -659,10 +659,17 @@ function renderHomeBody(){
     </div>`).join('');
   return `
     <div class="hero-grid">
-      <div class="card hero pad">
-        <span class="badge">Wiki style · LMS friendly</span>
-        <h2>Belajar internal medicine dengan struktur yang nyaman dibaca.</h2>
-        <p>Semua materi dipecah per part dan topic, bisa dicari cepat, diberi progress, dan dibuka seperti wiki yang bersih.</p>
+      <div class="card hero pad hero-brand-card">
+        <div class="hero-brand-row">
+          <img class="hero-app-icon" src="./assets/ipd-brillian-icon.png" alt="IPD Brillian app icon" />
+          <span class="badge">IPD Brillian · Clinical companion</span>
+        </div>
+        <h2>Internal medicine, dirapikan jadi satu workspace klinis.</h2>
+        <p>Belajar materi high-yield, cari diagnosis cepat, tracking progress, dan buka Clinical Tools seperti CGA + TTV tanpa keluar dari alur belajar.</p>
+        <div class="toolbar hero-actions">
+          <a class="btn primary" href="#topic/${next.slug}">Lanjut belajar</a>
+          <a class="btn" href="#resource/cga-brillian">Buka Clinical Tools</a>
+        </div>
         <div class="stat-row">
           <div class="stat"><span>Modules</span><strong>${state.data.stats.modules}</strong></div>
           <div class="stat"><span>Topics</span><strong>${state.data.stats.topics}</strong></div>
@@ -696,9 +703,13 @@ function renderHomeBodyMobile(){
   const next = topics.find(t => !state.done.has(topicKey(t.partSlug, t.slug))) || topics[0] || {slug:'home'};
   return `
     <div class="hero-grid mobile-home-grid">
-      <div class="card hero pad">
-        <span class="badge">Wiki style · LMS friendly</span>
-        <h2>Belajar medicine lebih ringkas.</h2>
+      <div class="card hero pad hero-brand-card">
+        <div class="hero-brand-row mobile-hero-brand-row">
+          <img class="hero-app-icon" src="./assets/ipd-brillian-icon.png" alt="IPD Brillian app icon" />
+          <span class="badge">IPD Brillian</span>
+        </div>
+        <h2>Belajar IPD lebih cepat, rapi, dan siap dipakai di klinik.</h2>
+        <p>Materi high-yield + Clinical Tools dalam satu app kecil.</p>
         <div class="stat-row mobile-stat-row">
           <div class="stat"><span>Modules</span><strong>${state.data.stats.modules}</strong></div>
           <div class="stat"><span>Topics</span><strong>${state.data.stats.topics}</strong></div>
