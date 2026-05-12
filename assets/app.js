@@ -30,6 +30,7 @@ const els = {
   sidebarToggle: document.getElementById('sidebarToggle'),
   sidebarBackdrop: document.getElementById('sidebarBackdrop'),
   mobileSearch: document.getElementById('mobileSearch'),
+  mobileThemeInline: document.getElementById('mobileThemeInline'),
   mobileHome: document.getElementById('mobileHome'),
   mobileStudy: document.getElementById('mobileStudy'),
   mobileReview: document.getElementById('mobileReview'),
@@ -98,6 +99,12 @@ function setTheme(){
   }
   if (els.mobileTheme) {
     els.mobileTheme.innerHTML = state.theme === 'dark' ? '<span aria-hidden="true">☀</span>' : '<span aria-hidden="true">☾</span>';
+  }
+  if (els.mobileThemeInline) {
+    els.mobileThemeInline.innerHTML = state.theme === 'dark'
+      ? '<span class="theme-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v2.2M12 18.8V21M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M3 12h2.2M18.8 12H21M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/></svg></span><span>Light mode</span>'
+      : '<span class="theme-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 14.6A8.4 8.4 0 0 1 9.4 4a8.8 8.8 0 1 0 10.6 10.6Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span><span>Dark mode</span>';
+    els.mobileThemeInline.title = state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
   }
 }
 function setFocus(){
@@ -763,6 +770,7 @@ async function init(){
   if (els.mobileReview) els.mobileReview.onclick = () => goHomeMode('review');
   if (els.mobileCga) els.mobileCga.onclick = () => { state.mode = 'home'; location.hash = '#resource/cga-brillian'; };
   if (els.mobileTheme) els.mobileTheme.onclick = () => { state.theme = state.theme === 'dark' ? 'light' : 'dark'; setStorage(); setTheme(); };
+  if (els.mobileThemeInline) els.mobileThemeInline.onclick = () => { state.theme = state.theme === 'dark' ? 'light' : 'dark'; setStorage(); setTheme(); };
   if (els.nav) els.nav.addEventListener('click', e => {
     const link = e.target.closest('a');
     if (link && window.matchMedia('(max-width: 720px)').matches) {
