@@ -721,7 +721,7 @@ function renderAiMessages(){
     <div class="ai-msg ${m.role}">
       <div class="ai-role">${m.role === 'assistant' ? 'AI Tutor' : 'You'}</div>
       <div class="ai-text">${m.role === 'assistant' ? renderMarkdown(m.content, m.citations || []) : esc(m.content)}</div>
-      ${m.role === 'assistant' && m.citations?.length ? `<div class="ai-source-list">${m.citations.map(c => `<a href="${esc(c.url)}"><span>[${c.id}]</span>${esc(c.title)} — ${esc(c.section)}</a>`).join('')}</div>` : ''}
+      ${m.role === 'assistant' && m.citations?.length ? `<div class="ai-source-list">${m.citations.map(c => `<a href="${esc(c.url)}" ${String(c.url).startsWith('http') ? 'target="_blank" rel="noopener"' : ''}><span>[${c.id}]</span>${esc(c.title)} — ${esc(c.section)}</a>`).join('')}</div>` : ''}
     </div>`).join('') || `<div class="ai-empty">Belum ada chat. Coba: “jelaskan sepsis hour-1 bundle”.</div>`;
 }
 const aiNudgeTexts = ['Ask me!', 'I’m your tutor!', 'Butuh bantuan?', 'Tanya materi di sini'];
@@ -809,7 +809,7 @@ async function submitAiTutor(text){
     const data = await res.json();
     state.aiHistory.pop();
     if (!res.ok) throw new Error(data.error || 'AI request failed');
-    state.aiHistory.push({role:'assistant', content:data.answer, citations:sources});
+    state.aiHistory.push({role:'assistant', content:data.answer, citations:(data.citations?.length ? data.citations : sources)});
   } catch (e) {
     state.aiHistory.pop();
     state.aiHistory.push({role:'assistant', content:`Error: ${e.message || e}`});

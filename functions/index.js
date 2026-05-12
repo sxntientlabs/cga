@@ -58,10 +58,24 @@ exports.aiTutor = onRequest({
     const text = await r.text();
     if (!r.ok) return res.status(r.status).json({ error: text.slice(0, 800) });
     const data = JSON.parse(text);
-    const answer = webSearch
-      ? (data.output_text || (data.output || []).flatMap(o => o.content || []).map(c => c.text || '').join('\n'))
-      : (data.choices?.[0]?.message?.content || '');
-    return res.json({ answer, model: data.model || MODEL, webSearch: !!webSearch });
+    let citations = [];
+    let answer = data.choices?.[0]?.message?.content || '';
+    if (webSearch) {
+      const parts = (data.output || []).flatMap(o => o.content || []).filter(c => c.type === 'output_text' || c.text);
+      answer = data.output_text || parts.map(c => c.text || '').join('\n');
+      const seen = new Map();
+      for (const c of parts) for (const a of (c.annotations || [])) {
+        const u = a.url || a.url_citation?.url;
+        if (!u || seen.has(u)) continue;
+        const title = a.title || a.url_citation?.title || u;
+        seen.set(u, { id: seen.size + 1, title, section: 'Web', url: u });
+      }
+      citations = [...seen.values()];
+      for (const c of citations) {
+        if (!answer.includes(`[${c.id}]`)) answer += `\n[${c.id}] ${c.title}`;
+      }
+    }
+    return res.json({ answer, citations, model: data.model || MODEL, webSearch: !!webSearch });
   } catch (e) {
     return res.status(500).json({ error: String(e.message || e) });
   }
