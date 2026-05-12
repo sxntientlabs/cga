@@ -12,6 +12,7 @@ const state = {
   aiHistory: JSON.parse(localStorage.getItem('im-ai-history') || '[]'),
   aiOpen: JSON.parse(localStorage.getItem('im-ai-open') || 'false'),
   aiPos: JSON.parse(localStorage.getItem('im-ai-pos') || '{"right":22,"bottom":96}'),
+  aiNudge: false,
   quizState: {},
 };
 
@@ -721,6 +722,21 @@ function renderAiMessages(){
       ${m.role === 'assistant' && m.citations?.length ? `<div class="ai-source-list">${m.citations.map(c => `<a href="${esc(c.url)}"><span>[${c.id}]</span>${esc(c.title)} — ${esc(c.section)}</a>`).join('')}</div>` : ''}
     </div>`).join('') || `<div class="ai-empty">Belum ada chat. Coba: “jelaskan sepsis hour-1 bundle”.</div>`;
 }
+const aiNudgeTexts = ['Ask me!', 'I’m your tutor!', 'Butuh bantuan?', 'Tanya materi di sini'];
+let aiNudgeTimer = null;
+function scheduleAiNudge(){
+  clearTimeout(aiNudgeTimer);
+  aiNudgeTimer = setTimeout(() => {
+    if (!state.aiOpen) {
+      state.aiNudge = aiNudgeTexts[Math.floor(Math.random() * aiNudgeTexts.length)];
+      renderAiFloat();
+      setTimeout(() => { state.aiNudge = false; renderAiFloat(); }, 9000);
+    }
+    scheduleAiNudge();
+  }, 180000);
+}
+function resetAiNudge(){ if (state.aiNudge) { state.aiNudge = false; renderAiFloat(); } scheduleAiNudge(); }
+function resetAiNudgeOnActivity(e){ if (e?.target?.closest?.('#aiFloat')) return; resetAiNudge(); }
 function renderAiFloat(){
   document.getElementById('aiFloat')?.remove();
   const pos = state.aiPos || {right:22,bottom:96};
@@ -730,6 +746,7 @@ function renderAiFloat(){
   box.style.right = `${Math.max(8, pos.right || 22)}px`;
   box.style.bottom = `${Math.max(8, pos.bottom || 96)}px`;
   box.innerHTML = `
+    ${state.aiNudge && !state.aiOpen ? `<button class="ai-nudge" type="button" data-ai-toggle>${esc(state.aiNudge)}</button>` : ''}
     <button class="ai-fab" type="button" data-ai-toggle aria-label="AI Tutor">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5c1.8 0 3.25 1.45 3.25 3.25S13.8 10 12 10 8.75 8.55 8.75 6.75 10.2 3.5 12 3.5Zm6 8.25c1.1 0 2 .9 2 2v.5c0 2.9-2.35 5.25-5.25 5.25h-5.5C6.35 19.5 4 17.15 4 14.25v-.5c0-1.1.9-2 2-2h12Zm-8.4 2.55a.85.85 0 1 0 0 1.7.85.85 0 0 0 0-1.7Zm4.8 0a.85.85 0 1 0 0 1.7.85.85 0 0 0 0-1.7ZM6.2 8.4a.9.9 0 0 1 .9.9v1.2a.9.9 0 1 1-1.8 0V9.3a.9.9 0 0 1 .9-.9Zm11.6 0a.9.9 0 0 1 .9.9v1.2a.9.9 0 1 1-1.8 0V9.3a.9.9 0 0 1 .9-.9Z"/></svg>
     </button>
@@ -1028,7 +1045,7 @@ async function init(){
   });
   document.addEventListener('click', e => {
     const toggleAi = e.target.closest('[data-ai-toggle]');
-    if (toggleAi) { e.preventDefault(); state.aiOpen = !state.aiOpen; setStorage(); renderAiFloat(); return; }
+    if (toggleAi) { e.preventDefault(); state.aiNudge = false; state.aiOpen = !state.aiOpen; setStorage(); renderAiFloat(); scheduleAiNudge(); return; }
     const closeAi = e.target.closest('[data-ai-close]');
     if (closeAi) { e.preventDefault(); state.aiOpen = false; setStorage(); renderAiFloat(); return; }
     const prompt = e.target.closest('[data-ai-prompt]');
@@ -1063,6 +1080,8 @@ async function init(){
       }
     }
   });
+  ['pointerdown','keydown','scroll','touchstart'].forEach(ev => window.addEventListener(ev, resetAiNudgeOnActivity, {passive:true}));
+  scheduleAiNudge();
   window.addEventListener('hashchange', setRoute);
   setTheme();
   setFocus();
