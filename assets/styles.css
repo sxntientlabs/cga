@@ -1,3 +1,4 @@
+@import url('https://internalmedstud.space-z.ai/_next/static/chunks/2473c16c0c2f6b5f.css');
 :root{
   --bg:#f7f7f5; --panel:#ffffff; --panel-2:#fafaf8; --line:#e5e7eb; --ink:#172033; --muted:#667085;
   --accent:#334155; --accent-2:#64748b; --good:#16a34a; --warn:#f59e0b; --shadow:0 14px 40px rgba(15,23,42,.07);
@@ -61,3 +62,31 @@ body.dark .btn.primary{color:#0f172a;background:#f8fafc;border-color:#f8fafc}
 .focus-mode .sidebar{display:none}.focus-mode .app-shell{grid-template-columns:1fr}.focus-mode .view-grid{grid-template-columns:1fr}.focus-mode .toc{display:none}.focus-mode .main{padding-inline:clamp(18px,4vw,72px)}
 .site-credit{padding:14px 20px 22px;text-align:center;color:var(--muted);font-size:.88rem;letter-spacing:.01em}
 @media (max-width:720px){.site-credit{display:block;padding:18px 16px calc(96px + env(safe-area-inset-bottom));margin-top:6px;font-size:.82rem;color:var(--muted)}}
+
+/* Study-guide reading layout: match internalmedstud.space-z.ai */
+body{font-family:Geist,Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#fafafa;color:#09090b}
+body.dark{background:#09090b;color:#fafafa}
+.main{max-width:1180px;margin:0 auto;width:100%}
+.view-grid{grid-template-columns:minmax(0,1fr) 260px;gap:32px;align-items:start}
+.article.card{background:transparent;border:0;box-shadow:none;border-radius:0;padding:0;overflow:visible}
+.article-head{padding:0 0 20px;margin-bottom:20px;border-bottom:1px solid var(--line)}
+.article-head h2{font-size:2rem;line-height:1.15;letter-spacing:-.03em;margin:8px 0 6px;font-weight:800}
+.article-head p{font-size:.95rem;line-height:1.5;color:var(--muted);margin:0}
+.section-card{background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important;padding:0!important;margin:0 0 28px!important;color:var(--ink)}
+.section-card h3{font-size:1rem;line-height:1.5;font-weight:700;margin:0 0 10px;color:var(--ink);letter-spacing:0}
+.section-card p{font-size:.875rem;line-height:1.43;margin:0 0 10px;color:var(--ink)}
+.section-card ul,.section-card ol{font-size:.875rem;line-height:1.43;margin:0 0 14px 1.5rem;padding:0;color:var(--ink)}
+.section-card li{margin:0 0 6px;padding-left:2px;line-height:1.43}
+.section-card li::marker{color:var(--ink)}
+.doc-table-wrap{margin:12px 0 18px;border:1px solid #e4e4e7;border-radius:8px;background:#fff;overflow:auto;box-shadow:none}
+.doc-table{width:100%;min-width:640px;border-collapse:collapse;border-spacing:0;background:#fff;font-size:.875rem;line-height:1.43;color:#09090b}
+.doc-table th,.doc-table td{border:1px solid #e4e4e7;padding:8px 12px;text-align:left;vertical-align:top;line-height:1.43}
+.doc-table th{background:#f4f4f5;font-weight:700;color:#09090b}
+.toc.card{position:sticky;top:18px;background:transparent;border:0;box-shadow:none;padding:0;border-radius:0}
+.toc h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 10px}
+.toc a{display:block;font-size:.875rem;line-height:1.35;color:var(--muted);padding:6px 0;border:0}
+.toc a:hover{color:var(--ink);background:transparent}
+body.dark .section-card,body.dark .section-card h3,body.dark .section-card p,body.dark .section-card li{color:#fafafa}
+body.dark .doc-table-wrap,body.dark .doc-table{background:#09090b;border-color:#27272a;color:#fafafa}
+body.dark .doc-table th{background:#18181b;color:#fafafa}body.dark .doc-table th,body.dark .doc-table td{border-color:#27272a}
+@media (max-width:720px){.main{max-width:none}.view-grid{display:block}.article-head{margin-bottom:16px;padding-bottom:16px}.article-head h2{font-size:1.55rem}.section-card{margin-bottom:24px!important}.section-card h3{font-size:1rem}.section-card p,.section-card ul,.section-card ol,.doc-table{font-size:.875rem}.doc-table{min-width:620px}.toc{display:none!important}}

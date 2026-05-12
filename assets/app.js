@@ -280,27 +280,42 @@ function renderNav(){
   }).join('');
   els.nav.innerHTML = moduleHtml + (resourceHtml ? `<div class="section-title" style="margin:14px 0 8px"><h3>Resources</h3><span>references & review</span></div>${resourceHtml}` : '');
 }
+function cleanSectionTitle(title){ return safeText(title, 'Section').replace(/^\s*\d+\.\s*/, ''); }
 function renderTable(rows){
   const htmlRows = normalizeBlocks(rows).map((row, i) => `<tr>${normalizeBlocks(row).map(cell => i===0 ? `<th>${esc(safeText(cell, ''))}</th>` : `<td>${esc(safeText(cell, ''))}</td>`).join('')}</tr>`).join('');
   return `<div class="doc-table-wrap"><table class="doc-table">${htmlRows}</table></div>`;
 }
 function renderBlocks(blocks){
   let html='';
-  let mode=null; let items=[];
-  const flush=()=>{
+  let mode=null; let items=[]; let paras=[];
+  const flushList=()=>{
     if (!items.length) return;
     const tag = mode === 'num' ? 'ol' : 'ul';
-    html += `<${tag}>${items.map(x => `<li>${esc(x)}</li>`).join('')}</${tag}>`;
+    const clean = items.map(x => safeText(x, '')).filter(Boolean);
+    if (!clean.length) { mode=null; items=[]; return; }
+    html += `<${tag}>${clean.map(x => `<li>${esc(x)}</li>`).join('')}</${tag}>`;
     mode=null; items=[];
   };
+  const flushParas=()=>{
+    const clean = paras.map(x => safeText(x, '')).filter(Boolean);
+    paras=[];
+    if (!clean.length) return;
+    if (clean.length === 1) { html += `<p>${esc(clean[0])}</p>`; return; }
+    const intro = clean.length >= 3 && /[:：]$/.test(clean[1]) ? `${clean[0]} ${clean[1]}` : '';
+    const list = intro ? clean.slice(2) : clean;
+    if (intro) html += `<p>${esc(intro)}</p>`;
+    if (list.length) html += `<ul>${list.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`;
+  };
   for (const b of normalizeBlocks(blocks)) {
-    if (b.type === 'bullet') { if (mode && mode !== 'bullet') flush(); mode = 'bullet'; items.push(b.text); continue; }
-    if (b.type === 'num') { if (mode && mode !== 'num') flush(); mode = 'num'; items.push(b.text); continue; }
-    flush();
-    if (b.type === 'p') { const text = safeText(b.text, ''); if (text) html += `<p>${esc(text)}</p>`; }
-    else if (b.type === 'table') html += renderTable(b.rows);
+    if (b.type === 'p') { paras.push(b.text); continue; }
+    flushParas();
+    if (b.type === 'bullet') { if (mode && mode !== 'bullet') flushList(); mode = 'bullet'; items.push(b.text); continue; }
+    if (b.type === 'num') { if (mode && mode !== 'num') flushList(); mode = 'num'; items.push(b.text); continue; }
+    flushList();
+    if (b.type === 'table') html += renderTable(b.rows);
   }
-  flush();
+  flushParas();
+  flushList();
   return html;
 }
 function openSearchHit(hit){
@@ -420,7 +435,7 @@ function renderResource(slug){
   const pageSections = normalizeSections(page.sections);
   els.pageSubtitle.textContent = `${sectionLabel(pageSections.length)} · reference page`;
   const intro = page.intro?.length ? `<div class="section-card" id="sec-overview"><h3>Overview</h3>${renderBlocks(page.intro)}</div>` : '';
-  const sections = pageSections.map(sec => `<div class="section-card" id="sec-${sec.slug}"><h3>${esc(safeText(sec.display || sec.title, 'Section'))}</h3>${renderBlocks(sec.blocks)}</div>`).join('');
+  const sections = pageSections.map(sec => `<div class="section-card" id="sec-${sec.slug}"><h3>${esc(cleanSectionTitle(sec.display || sec.title))}</h3>${renderBlocks(sec.blocks)}</div>`).join('');
   const tocSections = pageSections.length ? pageSections : [{slug:'overview', display:'Overview', blocks: page.intro || []}];
   const toc = tocSections.map(sec => `<a href="#resource/${page.slug}#sec-${sec.slug}">${esc(safeText(sec.display, 'Section'))}</a>`).join('');
   els.content.innerHTML = `
@@ -558,9 +573,9 @@ function renderTopic(slug){
   const key = topicKey(topic.partSlug, topic.slug);
   const bookmarked = state.bookmarks.has(key);
   const done = state.done.has(key);
-  const sections = topic.sections.map(sec => `<div class="section-card" id="sec-${sec.slug}"><h3>${esc(sec.title)}</h3>${renderBlocks(sec.blocks)}</div>`).join('');
+  const sections = topic.sections.map(sec => `<div class="section-card" id="sec-${sec.slug}"><h3>${esc(cleanSectionTitle(sec.title))}</h3>${renderBlocks(sec.blocks)}</div>`).join('');
   const intro = topic.intro.length ? `<div class="section-card"><h3>Overview</h3>${renderBlocks(topic.intro)}</div>` : '';
-  const toc = topic.sections.map(sec => `<a href="#sec-${sec.slug}">${esc(sec.title)}</a>`).join('');
+  const toc = topic.sections.map(sec => `<a href="#sec-${sec.slug}">${esc(cleanSectionTitle(sec.title))}</a>`).join('');
   els.crumbs.textContent = `Home / ${safeText(topic.partTitle, 'Module')} / ${topic.display}`;
   els.pageTitle.textContent = topic.display;
   els.pageSubtitle.textContent = `${sectionLabel(topic.sectionCount)} · ${safeText(topic.partTitle, 'Module')} · high-yield review`;
