@@ -340,7 +340,7 @@ function renderHome(){
         <p style="color:var(--muted);line-height:1.6">Buka topik berikutnya atau lompat ke modul yang lagi kamu kejar.</p>
         <div class="toolbar">
           <a class="btn primary" href="#topic/${next.slug}">Resume</a>
-          <a class="btn" href="#resource/cga-brillian">Open CGA</a>
+          <a class="btn" href="#resource/cga-brillian">Open Clinical Tools</a>
           <button class="btn" id="resetDone">Reset progress</button>
         </div>
         <div class="note">Tip: search buat lompat langsung ke diagnosis, obat, protocol, atau section tertentu.</div>
@@ -418,9 +418,9 @@ function renderResource(slug){
   }
 }
 function renderCgaBrillianResource(page){
-  els.crumbs.textContent = `Home / Resources / ${safeText(page.display, 'CGA Brillian')}`;
-  els.pageTitle.textContent = safeText(page.display, 'CGA Brillian');
-  els.pageSubtitle.textContent = 'Integrated CGA assessment inside LMS Wiki';
+  els.crumbs.textContent = `Home / Resources / ${safeText(page.display, 'Clinical Tools')}`;
+  els.pageTitle.textContent = safeText(page.display, 'Clinical Tools');
+  els.pageSubtitle.textContent = 'CGA + TTV tools inside LMS Wiki';
   const src = './cga-brillian/index.html';
   els.content.innerHTML = `
     <div class="view-grid cga-view">
@@ -428,17 +428,17 @@ function renderCgaBrillianResource(page){
         <div class="article-head">
           <div>
             <span class="badge">Interactive feature</span>
-            <h2 style="margin-top:10px">CGA Brillian</h2>
-            <p>${esc(safeText(page.intro?.[0]?.text, 'Comprehensive Geriatric Assessment terintegrasi langsung ke LMS Wiki.'))}</p>
+            <h2 style="margin-top:10px">Clinical Tools</h2>
+            <p>${esc(safeText(page.intro?.[0]?.text, 'CGA dan TTV terintegrasi langsung ke LMS Wiki.'))}</p>
           </div>
           <div class="toolbar" style="margin:0;justify-content:flex-end">
             <a class="btn primary" href="${src}" target="_blank" rel="noreferrer">Open full page</a>
           </div>
         </div>
         <div class="cga-intro">
-          <div class="note">CGA ini tetap satu paket dengan IPD Brillian, tapi bisa dibuka full page kalau mau input lebih nyaman.</div>
+          <div class="note">Di dalam page ini ada dua tool: CGA dan TTV. Bisa dibuka full page kalau mau input lebih nyaman.</div>
           <div class="resource-frame">
-            <iframe src="${src}" title="CGA Brillian" loading="lazy"></iframe>
+            <iframe src="${src}" title="Clinical Tools" loading="lazy"></iframe>
           </div>
         </div>
       </article>
@@ -593,7 +593,7 @@ function renderStudy(){
       <div class="note">Gunakan sidebar untuk loncat ke module, lalu buka topic satu per satu dari home.</div>
       <div class="toolbar" style="margin-top:14px">
         <a class="btn primary" href="#home">Back to home</a>
-        <a class="btn" href="#resource/cga-brillian">Open CGA</a>
+        <a class="btn" href="#resource/cga-brillian">Open Clinical Tools</a>
       </div>
     </div>
     ${renderHomeBody()}
@@ -676,7 +676,7 @@ function renderHomeBody(){
         <p style="color:var(--muted);line-height:1.6">Lanjutkan ke topic berikutnya atau buka module yang kamu mau.</p>
         <div class="toolbar">
           <a class="btn primary" href="#topic/${next.slug}">Start / Continue</a>
-          <a class="btn" href="#resource/cga-brillian">Open CGA</a>
+        <a class="btn" href="#resource/cga-brillian">Open Clinical Tools</a>
           <button class="btn" id="resetDone">Reset progress</button>
         </div>
         <div class="note">Tip: pakai search untuk loncat ke diagnosis, obat, protocol, atau section spesifik.</div>
@@ -710,7 +710,7 @@ function renderHomeBodyMobile(){
         <h3 style="margin-top:0">Continue</h3>
         <div class="toolbar">
           <a class="btn primary" href="#topic/${next.slug}">Start / Continue</a>
-          <a class="btn" href="#resource/cga-brillian">Open CGA</a>
+          <a class="btn" href="#resource/cga-brillian">Open Clinical Tools</a>
         </div>
         <div class="note">Search atau pakai dock di bawah buat pindah cepat.</div>
       </div>

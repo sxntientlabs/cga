@@ -20879,13 +20879,14 @@
   "resources": [
     {
       "kind": "resource",
-      "title": "CGA Brillian",
-      "display": "CGA Brillian",
+      "title": "Clinical Tools",
+      "display": "Clinical Tools",
       "slug": "cga-brillian",
+      "searchText": "Clinical Tools CGA TTV assessment cepat form vital sign",
       "intro": [
         {
           "type": "p",
-          "text": "Comprehensive Geriatric Assessment terintegrasi langsung ke LMS Wiki. Buka page interaktif untuk penilaian geriatri dalam satu tempat."
+          "text": "CGA dan TTV terintegrasi langsung ke LMS Wiki. Buka page interaktif untuk assessment cepat dalam satu tempat."
         }
       ],
       "sections": [
@@ -20896,7 +20897,7 @@
           "blocks": [
             {
               "type": "p",
-              "text": "Gunakan tombol Open full page untuk membuka fitur CGA Brillian."
+              "text": "Gunakan tombol Open full page untuk membuka Clinical Tools."
             }
           ]
         }

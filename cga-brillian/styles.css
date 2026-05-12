@@ -27,6 +27,7 @@ body {
     flex-direction: column;
     align-items: center;
     line-height: 1.6;
+    overflow-x: hidden;
 }
 
 .container {
@@ -43,6 +44,106 @@ header {
     max-width: 180px;
     height: auto;
     filter: drop-shadow(var(--shadow));
+}
+
+.tool-tabs {
+    display: inline-flex;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 6px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.65);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.tool-tab {
+    border: 0;
+    background: transparent;
+    color: var(--primary-navy);
+    padding: 11px 18px;
+    border-radius: 999px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.tool-tab.active {
+    background: linear-gradient(135deg, var(--primary-navy), #24314b);
+    color: white;
+    box-shadow: 0 10px 22px rgba(23, 32, 51, 0.18);
+}
+
+.tool-pane { display: none; }
+.tool-pane.active { display: block; }
+
+.ttv-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.split-2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.ttv-input {
+    margin-top: 4px;
+}
+
+.ttv-inline-fields {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.ttv-inline-fields .date-input {
+    flex: 1 1 auto;
+}
+
+.field-suffix {
+    min-width: 56px;
+    font-weight: 700;
+    color: var(--primary-navy);
+    text-align: center;
+}
+
+.segmented {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.seg-btn {
+    border: 1px solid var(--border-color);
+    background: white;
+    color: var(--text-color);
+    border-radius: 999px;
+    padding: 10px 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.seg-btn:hover {
+    border-color: var(--primary-teal);
+    background-color: rgba(71, 85, 105, 0.05);
+}
+
+.seg-btn.active {
+    background: var(--primary-teal);
+    color: white;
+    border-color: var(--primary-teal);
+}
+
+.ttv-actions {
+    margin-top: 4px;
 }
 
 .section-card:first-of-type {
@@ -68,6 +169,7 @@ header {
     color: white;
     transition: var(--transition);
     user-select: none;
+    min-width: 0;
 }
 
 .section-header.navy { background: linear-gradient(135deg, var(--primary-navy), #24314b); }
@@ -236,4 +338,63 @@ footer a {
 
 .btn-mini:hover {
     background: #24314b;
+}
+
+@media (max-width: 768px) {
+    body {
+        overflow-x: hidden;
+    }
+
+    .tool-tabs {
+        width: 100%;
+    }
+
+    .tool-tab {
+        flex: 1 1 0;
+    }
+
+    .ttv-grid,
+    .split-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .ttv-inline-fields {
+        align-items: stretch;
+    }
+
+    .section-header {
+        width: 100%;
+        max-width: 100%;
+        display: block;
+        overflow: hidden;
+    }
+
+    .section-header > span:first-child {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        white-space: normal;
+    }
+
+    .section-header .status-label {
+        display: block;
+        margin-top: 4px;
+    }
+
+    .status-label {
+        margin-top: 0;
+        white-space: normal;
+    }
+
+    .action-buttons {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .btn {
+        width: 100%;
+    }
 }

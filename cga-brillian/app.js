@@ -198,56 +198,85 @@ const assessments = {
 };
 
 function renderAssessments() {
+    const host = document.getElementById('assessment-containers');
+    if (!host) return;
+
+    const headers = {
+        isar: 'ISAR',
+        adl: 'ADL Barthel',
+        iadl: 'IADL Lawton',
+        amt: 'AMT',
+        gds: 'GDS-5',
+        mna: 'MNA-SF',
+        frail: 'FRAIL',
+        cfs: 'CFS',
+        sar: 'SARC-F',
+        jatuh: 'Hendrich II',
+        braden: 'Braden Scale'
+    };
+
+    const headerTone = id => (id === 'isar' || id === 'iadl' || id === 'gds' || id === 'frail' || id === 'sar' || id === 'braden') ? 'navy' : 'teal';
+
+    host.innerHTML = Object.entries(assessments).map(([id, data]) => `
+        <div class="section-card">
+            <div class="section-header ${headerTone(id)}" onclick="toggleSection(this)">
+                <span>${headers[id] || id.toUpperCase()}</span>
+                <span class="status-label" id="${id}-status">Belum lengkap</span>
+            </div>
+            <div class="section-content" id="${data.container}"></div>
+        </div>
+    `).join('');
+
     for (const [id, data] of Object.entries(assessments)) {
         const container = document.getElementById(data.container);
         if (!container) continue;
-        
+
         container.innerHTML = '';
         data.questions.forEach((q, idx) => {
             const group = document.createElement('div');
             group.className = 'question-group';
             group.dataset.id = `${id}-${idx}`;
-            
+
             const qText = document.createElement('div');
             qText.className = 'question-text';
             qText.textContent = q.text;
-            
+
             const optionsDiv = document.createElement('div');
             optionsDiv.className = q.options.length > 2 ? 'options-stack' : 'options-grid';
-            
+
             q.options.forEach(opt => {
                 const btn = document.createElement('div');
                 btn.className = 'option-btn';
-                
+
                 if (opt.desc) {
                     btn.innerHTML = `<div style="text-align: left;"><div style="font-weight: 700; margin-bottom: 4px;">${opt.t}</div><div style="font-size: 0.8rem; font-weight: 400; opacity: 0.85; line-height: 1.3;">${opt.desc}</div></div>`;
                 } else {
                     btn.textContent = opt.t;
                 }
-                
+
                 btn.onclick = () => selectOption(btn, opt.v);
                 optionsDiv.appendChild(btn);
             });
-            
+
             group.appendChild(qText);
             group.appendChild(optionsDiv);
-            
+
             if (q.hasBMICalc) {
                 const calcDiv = document.createElement('div');
                 calcDiv.className = 'bmi-calc';
                 calcDiv.innerHTML = `
-                    <div style="display: flex; gap: 10px; align-items: center;">
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                         <input type="number" placeholder="BB (kg)" class="bmi-input" id="bmi-bb">
                         <input type="number" placeholder="TB (cm)" class="bmi-input" id="bmi-tb">
                         <div id="bmi-result" style="font-weight: 700; color: var(--primary-teal); min-width: 60px;">-</div>
                         <button class="btn-mini" onclick="applyBMI(this)">Pakai</button>
                     </div>
                 `;
-                
+
                 const bbInput = calcDiv.querySelector('#bmi-bb');
                 const tbInput = calcDiv.querySelector('#bmi-tb');
                 const resultDiv = calcDiv.querySelector('#bmi-result');
-                
+
                 const updateBMI = () => {
                     const bb = parseFloat(bbInput.value);
                     const tb = parseFloat(tbInput.value) / 100;
@@ -259,7 +288,7 @@ function renderAssessments() {
                         resultDiv.textContent = '-';
                     }
                 };
-                
+
                 bbInput.oninput = updateBMI;
                 tbInput.oninput = updateBMI;
                 group.appendChild(calcDiv);
@@ -268,7 +297,6 @@ function renderAssessments() {
             container.appendChild(group);
         });
 
-        // Add footer note for CFS
         if (id === 'cfs') {
             const note = document.createElement('div');
             note.style.cssText = 'font-size: 0.8rem; color: #666; line-height: 1.4; border-top: 1px solid #eee; padding-top: 15px; margin-top: 10px;';
@@ -370,4 +398,113 @@ function copyResults() {
     navigator.clipboard.writeText(text).then(() => alert('Hasil disalin ke clipboard!'));
 }
 
+function setActiveSeg(groupName, value) {
+    document.querySelectorAll(`.segmented[data-group="${groupName}"] .seg-btn`).forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.device === value || btn.dataset.mode === value);
+    });
+}
+
+function getActiveSeg(groupName) {
+    return document.querySelector(`.segmented[data-group="${groupName}"] .seg-btn.active`)?.dataset.device || document.querySelector(`.segmented[data-group="${groupName}"] .seg-btn.active`)?.dataset.mode || '';
+}
+
+function buildTtvOutput() {
+    const name = document.getElementById('ttv-name')?.value.trim() || 'Nama pasien';
+    const nrm = document.getElementById('ttv-nrm')?.value.trim() || 'NRM';
+    const td = document.getElementById('ttv-td')?.value.trim() || '-';
+    const hr = document.getElementById('ttv-hr')?.value.trim() || '-';
+    const rr = document.getElementById('ttv-rr')?.value.trim() || '-';
+    const temp = document.getElementById('ttv-temp')?.value.trim() || '-';
+    const spo2 = document.getElementById('ttv-spo2')?.value.trim() || '-';
+    const spo2Device = getActiveSeg('spo2-device') || 'RA';
+    const spo2Flow = document.getElementById('ttv-spo2-flow')?.value.trim();
+    const drinkMode = getActiveSeg('drink-mode') || 'ml';
+    const drink = document.getElementById('ttv-drink')?.value.trim();
+    const urineMode = getActiveSeg('urine-mode') || 'ml';
+    const urine = document.getElementById('ttv-urine')?.value.trim();
+
+    const lines = [
+        `${name}/${nrm}`,
+        `TD ${td} mmHg`,
+        `HR ${hr}x/mnt`,
+        `RR ${rr}x/mnt`,
+        `Suhu ${temp}°C`,
+        `SpO2 ${spo2}% on ${spo2Device}${spo2Device === 'RA' || !spo2Flow ? '' : ` ${spo2Flow} lpm`}`,
+        drinkMode === 'puasa' ? 'Minum puasa' : `Minum ${drink || '-'} ml`,
+        urineMode === 'diaper' ? `Urine ${urine || '-'}x ganti popok` : `Urine ${urine || '-'} ml`
+    ];
+
+    return lines.join('\n');
+}
+
+function updateTtvPreview() {
+    const out = buildTtvOutput();
+    const el = document.getElementById('ttv-results');
+    if (el) el.textContent = out;
+    const status = document.getElementById('ttv-status');
+    if (status) status.textContent = 'Siap copy';
+
+    const flow = document.getElementById('ttv-spo2-flow');
+    const device = getActiveSeg('spo2-device') || 'RA';
+    if (flow) flow.disabled = device === 'RA';
+
+    const drinkMode = getActiveSeg('drink-mode') || 'ml';
+    const drinkSuffix = document.getElementById('drink-suffix');
+    const drinkInput = document.getElementById('ttv-drink');
+    if (drinkSuffix) drinkSuffix.textContent = drinkMode === 'puasa' ? '—' : 'ml';
+    if (drinkInput) drinkInput.disabled = drinkMode === 'puasa';
+
+    const urineMode = getActiveSeg('urine-mode') || 'ml';
+    const urineSuffix = document.getElementById('urine-suffix');
+    if (urineSuffix) urineSuffix.textContent = urineMode === 'diaper' ? 'x ganti' : 'ml';
+}
+
+function copyTtvResults() {
+    const text = buildTtvOutput();
+    navigator.clipboard.writeText(text).then(() => {
+        const status = document.getElementById('ttv-status');
+        if (status) status.textContent = 'Tersalin';
+        alert('Hasil TTV disalin ke clipboard!');
+    });
+}
+
+function resetTtvForm() {
+    ['ttv-name','ttv-nrm','ttv-td','ttv-hr','ttv-rr','ttv-temp','ttv-spo2','ttv-spo2-flow','ttv-drink','ttv-urine'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    setActiveSeg('spo2-device', 'RA');
+    setActiveSeg('drink-mode', 'ml');
+    setActiveSeg('urine-mode', 'ml');
+    updateTtvPreview();
+}
+
+function initClinicaTools() {
+    const panes = document.querySelectorAll('.tool-pane');
+    const tabs = document.querySelectorAll('.tool-tab');
+    const showTool = tool => {
+        tabs.forEach(tab => tab.classList.toggle('active', tab.dataset.tool === tool));
+        panes.forEach(pane => pane.classList.toggle('active', pane.id === `${tool}-pane`));
+    };
+
+    tabs.forEach(tab => tab.addEventListener('click', () => showTool(tab.dataset.tool)));
+    document.querySelectorAll('.segmented .seg-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const group = btn.closest('.segmented')?.dataset.group;
+            if (!group) return;
+            const key = btn.dataset.device || btn.dataset.mode;
+            setActiveSeg(group, key);
+            updateTtvPreview();
+        });
+    });
+
+    ['ttv-name','ttv-nrm','ttv-td','ttv-hr','ttv-rr','ttv-temp','ttv-spo2','ttv-spo2-flow','ttv-drink','ttv-urine'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', updateTtvPreview);
+    });
+
+    updateTtvPreview();
+}
+
 renderAssessments();
+initClinicaTools();

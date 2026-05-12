@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CGA Brillian | IPD Brillian</title>
+    <title>Clinical Tools | IPD Brillian</title>
     <link rel="icon" type="image/png" href="../assets/favicon.png">
     <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png" />
     <link rel="stylesheet" href="styles.css">
@@ -13,138 +13,127 @@
     <div class="container">
         <header>
             <img src="../assets/ipd-brillian-icon.png" alt="IPD Brillian" class="header-logo">
+            <div class="tool-tabs" role="tablist" aria-label="Clinical tools">
+                <button class="tool-tab active" id="tab-cga" data-tool="cga" type="button">CGA</button>
+                <button class="tool-tab" id="tab-ttv" data-tool="ttv" type="button">TTV</button>
+            </div>
         </header>
 
-        <!-- 1. Tanggal Pemeriksaan -->
-        <div class="section-card">
-            <div class="section-header teal" onclick="toggleSection(this)">
-                <span>Tanggal Pemeriksaan</span>
+        <div id="cga-pane" class="tool-pane active">
+            <div class="section-card">
+                <div class="section-header teal" onclick="toggleSection(this)">
+                    <span>Tanggal Pemeriksaan</span>
+                </div>
+                <div class="section-content active">
+                    <div class="question-group">
+                        <div class="question-text">Tanggal Pemeriksaan</div>
+                        <input type="date" id="exam-date" class="date-input">
+                    </div>
+                </div>
             </div>
-            <div class="section-content active">
-                <div class="question-group">
-                    <div class="question-text">Tanggal Pemeriksaan</div>
-                    <input type="date" id="exam-date" class="date-input">
+
+            <div id="assessment-containers"></div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="calculateScores()">Hitung Skor</button>
+                <button class="btn btn-danger" onclick="resetForm()">Reset</button>
+                <button class="btn btn-secondary" onclick="copyResults()">Salin Hasil</button>
+            </div>
+
+            <div id="results" class="results-area">Hasil akan muncul di sini...</div>
+        </div>
+
+        <div id="ttv-pane" class="tool-pane">
+            <div class="section-card">
+                <div class="section-header navy">
+                    <span>Form TTV cepat</span>
+                    <span class="status-label" id="ttv-status">Siap dipakai</span>
+                </div>
+                <div class="section-content active">
+                    <div class="ttv-grid">
+                        <div class="question-group">
+                            <div class="question-text">Nama pasien</div>
+                            <input id="ttv-name" class="date-input ttv-input" type="text" placeholder="Nama pasien">
+                        </div>
+                        <div class="question-group">
+                            <div class="question-text">NRM</div>
+                            <input id="ttv-nrm" class="date-input ttv-input" type="text" placeholder="NRM">
+                        </div>
+
+                        <div class="question-group split-2">
+                            <div>
+                                <div class="question-text">TD</div>
+                                <input id="ttv-td" class="date-input ttv-input" type="text" placeholder="125/70">
+                            </div>
+                            <div>
+                                <div class="question-text">HR</div>
+                                <input id="ttv-hr" class="date-input ttv-input" type="number" inputmode="numeric" placeholder="53">
+                            </div>
+                        </div>
+
+                        <div class="question-group split-2">
+                            <div>
+                                <div class="question-text">RR</div>
+                                <input id="ttv-rr" class="date-input ttv-input" type="number" inputmode="numeric" placeholder="22">
+                            </div>
+                            <div>
+                                <div class="question-text">Suhu</div>
+                                <input id="ttv-temp" class="date-input ttv-input" type="text" inputmode="decimal" placeholder="36,7">
+                            </div>
+                        </div>
+
+                        <div class="question-group">
+                            <div class="question-text">SpO2</div>
+                            <input id="ttv-spo2" class="date-input ttv-input" type="number" inputmode="numeric" placeholder="96">
+                            <div class="segmented" data-group="spo2-device">
+                                <button type="button" class="seg-btn active" data-device="RA">RA</button>
+                                <button type="button" class="seg-btn" data-device="Simple Mask">Simple Mask</button>
+                                <button type="button" class="seg-btn" data-device="NK">NK</button>
+                                <button type="button" class="seg-btn" data-device="RM">RM</button>
+                                <button type="button" class="seg-btn" data-device="NRM">NRM</button>
+                            </div>
+                            <div class="ttv-inline-fields">
+                                <input id="ttv-spo2-flow" class="date-input ttv-input" type="number" inputmode="numeric" placeholder="2">
+                                <div class="field-suffix">lpm</div>
+                            </div>
+                        </div>
+
+                        <div class="question-group">
+                            <div class="question-text">Minum</div>
+                            <div class="ttv-inline-fields">
+                                <input id="ttv-drink" class="date-input ttv-input" type="number" inputmode="numeric" placeholder="1000">
+                                <div class="field-suffix" id="drink-suffix">ml</div>
+                            </div>
+                            <div class="segmented" data-group="drink-mode">
+                                <button type="button" class="seg-btn active" data-mode="ml">ml</button>
+                                <button type="button" class="seg-btn" data-mode="puasa">Puasa</button>
+                            </div>
+                        </div>
+
+                        <div class="question-group">
+                            <div class="question-text">Urin</div>
+                            <div class="ttv-inline-fields">
+                                <input id="ttv-urine" class="date-input ttv-input" type="number" inputmode="numeric" placeholder="200">
+                                <div class="field-suffix" id="urine-suffix">ml</div>
+                            </div>
+                            <div class="segmented" data-group="urine-mode">
+                                <button type="button" class="seg-btn active" data-mode="ml">ml</button>
+                                <button type="button" class="seg-btn" data-mode="diaper">Ganti popok</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons ttv-actions">
+                        <button class="btn btn-primary" onclick="copyTtvResults()">Salin Hasil</button>
+                        <button class="btn btn-danger" onclick="resetTtvForm()">Reset</button>
+                    </div>
+
+                    <div id="ttv-results" class="results-area">Hasil TTV akan muncul di sini...</div>
                 </div>
             </div>
         </div>
 
-        <!-- Assessment Sections (Rendered by JS) -->
-        <div id="assessment-containers">
-            <!-- ISAR -->
-            <div class="section-card">
-                <div class="section-header navy" onclick="toggleSection(this)">
-                    <span>ISAR (Identifikasi Pasien Geriatri Berisiko)</span>
-                    <span class="status-label" id="isar-status">Belum lengkap</span>
-                </div>
-                <div class="section-content" id="isar-section"></div>
-            </div>
-
-            <!-- ADL Barthel -->
-            <div class="section-card">
-                <div class="section-header teal" onclick="toggleSection(this)">
-                    <span>Status Fungsional - ADL Barthel</span>
-                    <span class="status-label" id="adl-status">Belum lengkap</span>
-                </div>
-                <div class="section-content" id="adl-section"></div>
-            </div>
-
-            <!-- IADL Lawton -->
-            <div class="section-card">
-                <div class="section-header navy" onclick="toggleSection(this)">
-                    <span>Status Fungsional - IADL Lawton</span>
-                    <span class="status-label" id="iadl-status">Belum lengkap</span>
-                </div>
-                <div class="section-content" id="iadl-section"></div>
-            </div>
-
-            <!-- AMT -->
-            <div class="section-card">
-                <div class="section-header teal" onclick="toggleSection(this)">
-                    <span>Status Mental - Abbreviated Mental Test (AMT)</span>
-                    <span class="status-label" id="amt-status">Belum lengkap</span>
-                </div>
-                <div class="section-content" id="amt-section"></div>
-            </div>
-
-            <!-- GDS-5 -->
-            <div class="section-card">
-                <div class="section-header navy" onclick="toggleSection(this)">
-                    <span>Status Mental - 5-Item Geriatric Depression Scale (GDS-5)</span>
-                    <span class="status-label" id="gds-status">Belum lengkap</span>
-                </div>
-                <div class="section-content" id="gds-section"></div>
-            </div>
-
-            <!-- MNA-SF -->
-            <div class="section-card">
-                <div class="section-header teal" onclick="toggleSection(this)">
-                    <span>Status Nutrisi - Mini Nutritional Assessment (MNA-SF)</span>
-                    <span class="status-label" id="mna-status">Belum lengkap</span>
-                </div>
-                <div class="section-content" id="mna-section"></div>
-            </div>
-
-            <!-- FRAIL -->
-            <div class="section-card">
-                <div class="section-header navy" onclick="toggleSection(this)">
-                    <span>Status Frailty - FRAIL</span>
-                    <span class="status-label" id="frail-status">Belum lengkap</span>
-                </div>
-                <div class="section-content" id="frail-section"></div>
-            </div>
-
-            <!-- CFS -->
-            <div class="section-card">
-                <div class="section-header teal" onclick="toggleSection(this)">
-                    <span>Status Frailty - Clinical Frailty Scale (CFS)</span>
-                    <span class="status-label" id="cfs-status">Belum lengkap</span>
-                </div>
-                <div class="section-content" id="cfs-section"></div>
-            </div>
-
-            <!-- SARC-F -->
-            <div class="section-card">
-                <div class="section-header navy" onclick="toggleSection(this)">
-                    <span>Status Sarcopenia - SARC-F</span>
-                    <span class="status-label" id="sar-status">Belum lengkap</span>
-                </div>
-                <div class="section-content" id="sar-section"></div>
-            </div>
-
-            <!-- Hendrich II -->
-            <div class="section-card">
-                <div class="section-header teal" onclick="toggleSection(this)">
-                    <span>Risiko Jatuh - Hendrich II Fall Risk Model</span>
-                    <span class="status-label" id="jatuh-status">Belum lengkap</span>
-                </div>
-                <div class="section-content" id="jatuh-section"></div>
-            </div>
-
-            <!-- Braden Scale -->
-            <div class="section-card">
-                <div class="section-header navy" onclick="toggleSection(this)">
-                    <span>Skala Braden (Braden Scale)</span>
-                    <span class="status-label" id="braden-status">Belum lengkap</span>
-                </div>
-                <div class="section-content" id="braden-section"></div>
-            </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="action-buttons">
-            <button class="btn btn-primary" onclick="calculateScores()">Hitung Skor</button>
-            <button class="btn btn-danger" onclick="resetForm()">Reset</button>
-            <button class="btn btn-secondary" onclick="copyResults()">Salin Hasil</button>
-        </div>
-
-        <!-- Results Area -->
-        <div id="results" class="results-area">Hasil akan muncul di sini...</div>
-
-
-
-        <footer>
-            developed by @rafaellrm_
-        </footer>
+        <footer>developed by @rafaellrm_</footer>
     </div>
 
     <script src="app.js"></script>
