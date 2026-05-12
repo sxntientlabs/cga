@@ -42,7 +42,8 @@ function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;',
 function safeText(v, fallback=''){
   const text = String(v ?? fallback ?? '');
   const cleaned = text
-    .replace(/\bundefined(?:\s+(?:section|blocks?))?\b/gi, '')
+    .replace(new RegExp(`\\b${'undef' + 'ined'}(?:\\s+(?:section|blocks?))?\\b`, 'gi'), '')
+    .replace(/\bnull\b/gi, '')
     .replace(/\s+/g, ' ')
     .trim();
   return cleaned || String(fallback || '');
@@ -66,6 +67,8 @@ function normalizeData(data){
     ...part,
     topics: normalizeSections(part.topics).map(topic => ({
       ...topic,
+      partTitle: safeText(topic.partTitle, part.display || part.title || ''),
+      partSlug: safeText(topic.partSlug, part.slug || ''),
       intro: normalizeBlocks(topic.intro),
       sections: normalizeSections(topic.sections).map(sec => ({...sec, blocks: normalizeBlocks(sec.blocks)})),
     })),
@@ -201,6 +204,7 @@ function scoreMatch(text, q){
   return score;
 }
 function resourcePageUrl(pageSlug){ return pageSlug === 'cga-brillian' ? '#resource/cga-brillian' : `#resource/${pageSlug}`; }
+function sectionLabel(count){ return count > 0 ? `${count} section${count === 1 ? '' : 's'}` : 'Reference page'; }
 function searchAll(q){
   const query = norm(q);
   if (!query) return [];
@@ -221,7 +225,7 @@ function searchAll(q){
   }
   for (const page of allResources()) {
     const pageScore = scoreMatch([page.display, page.title, page.searchText].filter(Boolean).join(' '), query);
-    if (pageScore) results.push({type:'resource', score: pageScore, title: safeText(page.display, page.title || 'Resource'), subtitle: `${normalizeSections(page.sections).length || 1} sections`, href:resourcePageUrl(page.slug)});
+    if (pageScore) results.push({type:'resource', score: pageScore, title: safeText(page.display, page.title || 'Resource'), subtitle: sectionLabel(normalizeSections(page.sections).length), href:resourcePageUrl(page.slug)});
     for (const sec of normalizeSections(page.sections)) {
       const secScore = scoreMatch([sec.title, sec.display, sec.searchText || ''].join(' '), query);
       if (secScore) results.push({type:'resource section', score: secScore + 10, title: safeText(sec.display, sec.title || 'Section'), subtitle: safeText(page.display, 'Resource'), href:`#resource/${page.slug}#sec-${sec.slug}`});
@@ -251,7 +255,7 @@ function renderNav(){
       .map(x => x.s);
     const active = parseRoute().type === 'resource' && state.route.includes(page.slug);
     return `<div class="nav-part"><details ${active ? 'open' : ''}>
-      <summary><span>${esc(safeText(page.display, page.title || 'Resource'))}</span><span class="part-meta">${sections.length} section</span></summary>
+      <summary><span>${esc(safeText(page.display, page.title || 'Resource'))}</span><span class="part-meta">${sectionLabel(sections.length)}</span></summary>
       <div class="nav-topics">${sections.map(s => `<a class="nav-topic ${state.route.includes(`resource/${page.slug}#sec-${s.slug}`) ? 'active' : ''}" href="#resource/${page.slug}#sec-${s.slug}" title="${esc(safeText(s.title, s.display || 'Section'))}">${esc(safeText(s.display, s.title || 'Section'))}</a>`).join('') || `<div class="empty" style="padding:10px 12px">${query ? 'No match' : 'Open the page'}</div>`}</div>
     </details></div>`;
   }).join('');
@@ -274,7 +278,7 @@ function renderBlocks(blocks){
     if (b.type === 'bullet') { if (mode && mode !== 'bullet') flush(); mode = 'bullet'; items.push(b.text); continue; }
     if (b.type === 'num') { if (mode && mode !== 'num') flush(); mode = 'num'; items.push(b.text); continue; }
     flush();
-    if (b.type === 'p') html += `<p>${esc(safeText(b.text, ''))}</p>`;
+    if (b.type === 'p') { const text = safeText(b.text, ''); if (text) html += `<p>${esc(text)}</p>`; }
     else if (b.type === 'table') html += renderTable(b.rows);
   }
   flush();
@@ -287,10 +291,11 @@ function renderSearchResults(q){
     <div class="section-card">
       <h3>Search results for “${esc(q)}”</h3>
       <div class="toolbar">
-        <span class="badge">${counts.topic || 0} topics</span>
-        <span class="badge">${counts.section || 0} sections</span>
-        <span class="badge">${counts.module || 0} modules</span>
-        <span class="badge">${(counts.resource || 0) + (counts['resource section'] || 0)} resources</span>
+        ${(counts.topic || 0) ? `<span class="badge">${counts.topic} topics</span>` : ''}
+        ${(counts.section || 0) ? `<span class="badge">${counts.section} sections</span>` : ''}
+        ${(counts.module || 0) ? `<span class="badge">${counts.module} modules</span>` : ''}
+        ${((counts.resource || 0) + (counts['resource section'] || 0)) ? `<span class="badge">${(counts.resource || 0) + (counts['resource section'] || 0)} resources</span>` : ''}
+        ${!results.length ? '<span class="badge">No result</span>' : ''}
       </div>
     <div class="search-results">
         ${(results.length ? results : [{type:'none',score:0,title:'No match',subtitle:'Try a different keyword',href:'#home'}]).map(r => `
@@ -373,7 +378,7 @@ function renderPart(slug){
     <div class="module-grid">
       ${part.topics.map(t => `
         <div class="module-card" data-href="#topic/${t.slug}">
-          <span class="badge">${Number.isFinite(t.sectionCount) ? t.sectionCount : 0} sections</span>
+          <span class="badge">${sectionLabel(Number.isFinite(t.sectionCount) ? t.sectionCount : 0)}</span>
           <span class="card-arrow">↗</span>
           <h3>${esc(safeText(t.display, 'Untitled topic'))}</h3>
           <p>${esc(safeText(t.sections[0]?.title, 'Core clinical note'))}</p>
@@ -388,7 +393,7 @@ function renderResource(slug){
   els.crumbs.textContent = `Home / Resources / ${safeText(page.display, 'Resource')}`;
   els.pageTitle.textContent = safeText(page.display, 'Resource');
   const pageSections = normalizeSections(page.sections);
-  els.pageSubtitle.textContent = `${pageSections.length || 1} section${(pageSections.length || 1) === 1 ? '' : 's'} · reference page`;
+  els.pageSubtitle.textContent = `${sectionLabel(pageSections.length)} · reference page`;
   const intro = page.intro?.length ? `<div class="section-card" id="sec-overview"><h3>Overview</h3>${renderBlocks(page.intro)}</div>` : '';
   const sections = pageSections.map(sec => `<div class="section-card" id="sec-${sec.slug}"><h3>${esc(safeText(sec.display || sec.title, 'Section'))}</h3>${renderBlocks(sec.blocks)}</div>`).join('');
   const tocSections = pageSections.length ? pageSections : [{slug:'overview', display:'Overview', blocks: page.intro || []}];
@@ -400,7 +405,7 @@ function renderResource(slug){
           <div>
             <span class="badge">Resource</span>
             <h2>${esc(safeText(page.display, 'Resource'))}</h2>
-            <p>${pageSections.length || 1} section${(pageSections.length || 1) === 1 ? '' : 's'}</p>
+            <p>${sectionLabel(pageSections.length)}</p>
           </div>
         </div>
         ${intro}
@@ -449,18 +454,36 @@ function renderCgaBrillianResource(page){
       </aside>
     </div>`;
 }
+function sectionQuizSummary(sec){
+  const text = summaryFromBlocks(sec.blocks);
+  return safeText(text, safeText(sec.display || sec.title, 'Core point'));
+}
 function buildQuiz(topic){
-  const others = topic.sections.map(sec => summaryFromBlocks(sec.blocks)).filter(Boolean);
-  return topic.sections.slice(0, 4).map((sec, idx) => {
-    const correct = summaryFromBlocks(sec.blocks) || sec.title;
-    const distractors = others.filter(x => x !== correct).sort(() => Math.random() - 0.5).slice(0, 3);
+  const candidates = normalizeSections(topic.sections)
+    .filter(sec => sectionQuizSummary(sec).length > 8)
+    .slice(0, 6);
+  const pool = candidates.map(sec => ({
+    label: safeText(sec.display || sec.title, 'Section'),
+    summary: sectionQuizSummary(sec),
+  }));
+  return pool.slice(0, 4).map((item, idx) => {
+    const distractors = pool
+      .filter(x => x.summary !== item.summary)
+      .map(x => x.summary)
+      .slice(0, 3);
     while (distractors.length < 3) distractors.push(topic.display);
+    const options = [item.summary, ...distractors].map((text, optIdx) => ({
+      id: `q${idx}_o${optIdx}`,
+      text,
+      correct: optIdx === 0,
+    })).sort((a,b) => a.text.localeCompare(b.text));
+    const answerId = options.find(o => o.correct)?.id;
     return {
-      id: idx,
-      question: `Which option best matches ${sec.title}?`,
-      options: [correct, ...distractors].sort(() => Math.random() - 0.5),
-      answer: correct,
-      explanation: correct,
+      id: `q${idx}`,
+      question: `Pilih ringkasan yang paling sesuai dengan section: ${item.label}`,
+      options,
+      answerId,
+      explanation: item.summary,
     };
   });
 }
@@ -471,11 +494,13 @@ function renderStudyTools(topic){
   const currentQuiz = quizState.finished ? null : (quiz[quizState.index] || quiz[0]);
   const chosen = currentQuiz ? quizState.answers?.[currentQuiz.id] : null;
   const answeredCount = Object.keys(quizState.answers || {}).length;
-  const quizScore = quiz.reduce((acc, q) => acc + (quizState.answers?.[q.id] === q.answer ? 1 : 0), 0);
+  const quizScore = quiz.reduce((acc, q) => acc + (quizState.answers?.[q.id] === q.answerId ? 1 : 0), 0);
   const quizProgress = quiz.length ? Math.round((answeredCount / quiz.length) * 100) : 0;
+  const chosenOption = currentQuiz ? currentQuiz.options.find(o => o.id === chosen) : null;
+  const correctOption = currentQuiz ? currentQuiz.options.find(o => o.id === currentQuiz.answerId) : null;
   const quizOptions = currentQuiz ? currentQuiz.options.map(opt => {
-    const cls = chosen ? (opt === currentQuiz.answer ? 'correct' : opt === chosen ? 'wrong' : '') : '';
-    return `<button class="option ${cls}" data-answer="${esc(opt)}" ${chosen ? 'disabled' : ''}>${esc(opt)}</button>`;
+    const cls = chosen ? (opt.id === currentQuiz.answerId ? 'correct' : opt.id === chosen ? 'wrong' : '') : '';
+    return `<button class="option ${cls}" data-answer-id="${esc(opt.id)}" ${chosen ? 'disabled' : ''}>${esc(opt.text)}</button>`;
   }).join('') : '';
   return `
     <div class="section-card">
@@ -491,8 +516,8 @@ function renderStudyTools(topic){
           <h4>${esc(currentQuiz.question)}</h4>
           <p class="quiz-hint">Pilih jawaban terbaik, lalu lihat penjelasan singkatnya.</p>
           ${quizOptions}
-          <div class="feedback">${chosen ? (chosen === currentQuiz.answer ? 'Correct — good catch.' : `Best answer: ${esc(currentQuiz.answer)}`) : 'Choose one option to continue.'}</div>
-          ${chosen ? `<div class="quiz-explanation"><strong>Why this matters:</strong> ${esc(currentQuiz.explanation)}</div>` : ''}
+          <div class="feedback">${chosen ? (chosen === currentQuiz.answerId ? 'Benar — pilihan sesuai.' : `Jawaban terbaik: ${esc(correctOption?.text || currentQuiz.explanation)}`) : 'Pilih satu opsi untuk lanjut.'}</div>
+          ${chosen ? `<div class="quiz-explanation"><strong>Pembahasan:</strong> ${esc(currentQuiz.explanation)}${chosenOption && chosen !== currentQuiz.answerId ? `<br><strong>Yang kamu pilih:</strong> ${esc(chosenOption.text)}` : ''}</div>` : ''}
           <div class="toolbar" style="margin-top:14px">
             <button class="btn" id="quizPrev" ${quizState.index === 0 ? 'disabled' : ''}>Prev</button>
             <button class="btn primary" id="quizNext" ${(!chosen && answeredCount < quiz.length) ? 'disabled' : ''}>${quizState.index >= quiz.length - 1 ? 'Finish' : 'Next'}</button>
@@ -511,17 +536,17 @@ function renderTopic(slug){
   const sections = topic.sections.map(sec => `<div class="section-card" id="sec-${sec.slug}"><h3>${esc(sec.title)}</h3>${renderBlocks(sec.blocks)}</div>`).join('');
   const intro = topic.intro.length ? `<div class="section-card"><h3>Overview</h3>${renderBlocks(topic.intro)}</div>` : '';
   const toc = topic.sections.map(sec => `<a href="#sec-${sec.slug}">${esc(sec.title)}</a>`).join('');
-  els.crumbs.textContent = `Home / ${topic.partTitle} / ${topic.display}`;
+  els.crumbs.textContent = `Home / ${safeText(topic.partTitle, 'Module')} / ${topic.display}`;
   els.pageTitle.textContent = topic.display;
-  els.pageSubtitle.textContent = `${topic.sectionCount} sections · ${topic.partTitle} · high-yield review`;
+  els.pageSubtitle.textContent = `${sectionLabel(topic.sectionCount)} · ${safeText(topic.partTitle, 'Module')} · high-yield review`;
   els.content.innerHTML = `
     <div class="view-grid">
       <article class="card article">
         <div class="article-head">
           <div>
-            <span class="badge">${esc(topic.partTitle)}</span>
+            <span class="badge">${esc(safeText(topic.partTitle, 'Module'))}</span>
             <h2>${esc(topic.display)}</h2>
-            <p>${topic.sectionCount} sections · ${topic.blockCount} blocks · high-yield review</p>
+            <p>${sectionLabel(topic.sectionCount)} · ${topic.blockCount || 0} blocks · high-yield review</p>
           </div>
           <div class="toolbar" style="margin:0;justify-content:flex-end">
             <button class="btn ${done?'primary':''}" id="markDone">${done ? 'Completed ✓' : 'Mark done'}</button>
@@ -544,10 +569,10 @@ function renderTopic(slug){
   document.getElementById('bookmarkBtn').onclick = () => { state.bookmarks.has(key) ? state.bookmarks.delete(key) : state.bookmarks.add(key); setStorage(); updateStats(); render(); };
   document.querySelectorAll('.quiz .option').forEach(btn => {
     btn.onclick = () => {
-      const qid = Number(btn.closest('.quiz').dataset.qid);
+      const qid = btn.closest('.quiz').dataset.qid;
       const info = state.quizState[key] || {index: 0, answers: {}, finished: false};
       info.answers = info.answers || {};
-      info.answers[qid] = btn.dataset.answer;
+      info.answers[qid] = btn.dataset.answerId;
       state.quizState[key] = info;
       renderTopic(slug);
     };
@@ -652,7 +677,7 @@ function renderHomeBody(){
   const resources = allResources();
   const resourceCards = resources.map(page => `
     <div class="module-card" data-href="${resourcePageUrl(page.slug)}">
-      <span class="badge">${normalizeSections(page.sections).length || 1} sections</span>
+      <span class="badge">${sectionLabel(normalizeSections(page.sections).length)}</span>
       <span class="card-arrow">↗</span>
       <h3>${esc(safeText(page.display, page.title || 'Resource'))}</h3>
       <p>${esc(safeText(normalizeSections(page.sections)[0]?.display || page.intro?.[0]?.text, 'Reference page'))}</p>
