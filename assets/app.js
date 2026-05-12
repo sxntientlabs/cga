@@ -2,6 +2,7 @@ const state = {
   data: null,
   route: 'home',
   search: '',
+  searchFilter: 'all',
   mode: 'home',
   theme: localStorage.getItem('im-theme') || 'light',
   focus: JSON.parse(localStorage.getItem('im-focus') || 'false'),
@@ -170,7 +171,8 @@ function parseRoute(){
 function summaryFromBlocks(blocks){
   const t = [];
   for (const b of normalizeBlocks(blocks)) {
-    if (b.type === 'p' || b.type === 'bullet') t.push(b.text);
+    if (b.type === 'p' || b.type === 'bullet' || b.type === 'num') t.push(b.text);
+    if (b.type === 'table') t.push((b.rows?.[0] || []).filter(Boolean).join(' · '));
     if (t.join(' ').length > 220) break;
   }
   return t.join(' ').replace(/\s+/g,' ').trim();
@@ -269,15 +271,20 @@ function renderNav(){
     </details></div>`;
   }).join('');
   const resourceHtml = allResources().map(page => {
+    const pageText = [page.display, page.title, page.searchText, blocksSearchText(page.intro)].filter(Boolean).join(' ');
+    const pageMatches = !query || scoreMatch(pageText, query) > 0;
     const sections = (page.sections || [])
-      .map(s => ({s, score: query ? scoreMatch(`${s.display} ${s.title} ${s.searchText || ''}`, query) : 1}))
+      .map(s => ({s, score: query ? scoreMatch(`${s.display} ${s.title} ${s.searchText || ''} ${blocksSearchText(s.blocks)}`, query) : 1}))
       .filter(x => !query || x.score > 0)
       .sort((a,b) => b.score - a.score)
       .map(x => x.s);
     const active = parseRoute().type === 'resource' && state.route.includes(page.slug);
+    const pageLink = pageMatches ? `<a class="nav-topic ${state.route === `resource/${page.slug}` ? 'active' : ''}" href="#resource/${page.slug}" title="Open ${esc(safeText(page.display, page.title || 'Resource'))}">Overview / open page</a>` : '';
+    const sectionLinks = sections.map(s => `<a class="nav-topic ${state.route.includes(`resource/${page.slug}#sec-${s.slug}`) ? 'active' : ''}" href="#resource/${page.slug}#sec-${s.slug}" title="${esc(safeText(s.title, s.display || 'Section'))}">${esc(safeText(s.display, s.title || 'Section'))}</a>`).join('');
+    const total = normalizeSections(page.sections).length || (page.intro?.length ? 1 : 0);
     return `<div class="nav-part"><details ${active ? 'open' : ''}>
-      <summary><span>${esc(safeText(page.display, page.title || 'Resource'))}</span><span class="part-meta">${sectionLabel(sections.length)}</span></summary>
-      <div class="nav-topics">${sections.map(s => `<a class="nav-topic ${state.route.includes(`resource/${page.slug}#sec-${s.slug}`) ? 'active' : ''}" href="#resource/${page.slug}#sec-${s.slug}" title="${esc(safeText(s.title, s.display || 'Section'))}">${esc(safeText(s.display, s.title || 'Section'))}</a>`).join('') || `<div class="empty" style="padding:10px 12px">${query ? 'No match' : 'Open the page'}</div>`}</div>
+      <summary><span>${esc(safeText(page.display, page.title || 'Resource'))}</span><span class="part-meta">${sectionLabel(total)}</span></summary>
+      <div class="nav-topics">${pageLink}${sectionLinks || ''}${!pageLink && !sectionLinks ? `<div class="empty" style="padding:10px 12px">No match</div>` : ''}</div>
     </details></div>`;
   }).join('');
   els.nav.innerHTML = moduleHtml + (resourceHtml ? `<div class="section-title" style="margin:14px 0 8px"><h3>Resources</h3><span>references & review</span></div>${resourceHtml}` : '');
@@ -313,21 +320,24 @@ function openSearchHit(hit){
   syncSearchInputs('');
   location.hash = hit.href;
 }
+function searchGroup(type){ return type === 'resource section' ? 'resource' : type; }
 function renderSearchResults(q){
-  const results = searchAll(q);
-  const counts = results.reduce((m,r) => ((m[r.type]=(m[r.type]||0)+1), m), {});
+  const all = searchAll(q);
+  const counts = all.reduce((m,r) => ((m[searchGroup(r.type)]=(m[searchGroup(r.type)]||0)+1), m), {});
+  const filters = [
+    ['all','All',all.length], ['topic','Topics',counts.topic||0], ['section','Sections',counts.section||0],
+    ['module','Modules',counts.module||0], ['resource','Resources',counts.resource||0]
+  ];
+  const active = filters.some(([id]) => id === state.searchFilter) ? state.searchFilter : 'all';
+  const results = active === 'all' ? all : all.filter(r => searchGroup(r.type) === active);
   return `
-    <div class="section-card">
+    <div class="section-card search-panel">
       <h3>Search results for “${esc(q)}”</h3>
-      <div class="toolbar">
-        ${(counts.topic || 0) ? `<span class="badge">${counts.topic} topics</span>` : ''}
-        ${(counts.section || 0) ? `<span class="badge">${counts.section} sections</span>` : ''}
-        ${(counts.module || 0) ? `<span class="badge">${counts.module} modules</span>` : ''}
-        ${((counts.resource || 0) + (counts['resource section'] || 0)) ? `<span class="badge">${(counts.resource || 0) + (counts['resource section'] || 0)} resources</span>` : ''}
-        ${!results.length ? '<span class="badge">No result</span>' : ''}
+      <div class="toolbar search-filter-row" role="tablist" aria-label="Search filters">
+        ${filters.map(([id,label,count]) => `<button type="button" class="badge search-filter ${active===id?'active':''}" data-search-filter="${id}">${label} <span>${count}</span></button>`).join('')}
       </div>
-    <div class="search-results">
-        ${(results.length ? results : [{type:'none',score:0,title:'No match',subtitle:'Try a different keyword',href:'#home'}]).map(r => `
+      <div class="search-results">
+        ${(results.length ? results : [{type:'none',score:0,title:'No match',subtitle:'Try another filter or keyword',href:'#home'}]).map(r => `
           <a class="search-hit" href="${r.href}">
             <div class="score">${r.type}${r.score ? ` · ${r.score}` : ''}</div>
             <strong>${esc(safeText(r.title, 'Untitled'))}</strong>
@@ -735,7 +745,7 @@ function renderHomeBody(){
       <span class="badge">${sectionLabel(normalizeSections(page.sections).length)}</span>
       <span class="card-arrow">↗</span>
       <h3>${esc(safeText(page.display, page.title || 'Resource'))}</h3>
-      <p>${esc(safeText(normalizeSections(page.sections)[0]?.display || page.intro?.[0]?.text, 'Reference page'))}</p>
+      <p>${esc(safeText(normalizeSections(page.sections)[0]?.display || summaryFromBlocks(page.intro), 'Reference page'))}</p>
     </div>`).join('');
   return `
     <div class="hero-grid">
@@ -833,7 +843,7 @@ async function init(){
     state.data = await res.json();
   }
   state.data = normalizeData(state.data);
-  const onSearch = value => { state.search = value; syncSearchInputs(value); render(); };
+  const onSearch = value => { state.search = value; state.searchFilter = 'all'; syncSearchInputs(value); render(); };
   els.search.addEventListener('input', e => onSearch(e.target.value));
   if (els.mobileSearch) els.mobileSearch.addEventListener('input', e => onSearch(e.target.value));
   els.search.addEventListener('keydown', e => {
@@ -864,6 +874,13 @@ async function init(){
   if (els.mobileTheme) els.mobileTheme.onclick = () => { state.theme = state.theme === 'dark' ? 'light' : 'dark'; setStorage(); setTheme(); };
   if (els.mobileThemeInline) els.mobileThemeInline.onclick = () => { state.theme = state.theme === 'dark' ? 'light' : 'dark'; setStorage(); setTheme(); };
   if (els.content) els.content.addEventListener('click', e => {
+    const filter = e.target.closest('[data-search-filter]');
+    if (filter) {
+      e.preventDefault();
+      state.searchFilter = filter.dataset.searchFilter || 'all';
+      render();
+      return;
+    }
     const hit = e.target.closest('.search-hit');
     if (hit) {
       e.preventDefault();
