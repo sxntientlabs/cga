@@ -12,6 +12,7 @@ const state = {
   aiHistory: JSON.parse(localStorage.getItem('im-ai-history') || '[]'),
   aiOpen: JSON.parse(localStorage.getItem('im-ai-open') || 'false'),
   aiPos: JSON.parse(localStorage.getItem('im-ai-pos') || '{"right":22,"bottom":96}'),
+  aiWebSearch: JSON.parse(localStorage.getItem('im-ai-web') || 'false'),
   aiNudge: false,
   quizState: {},
 };
@@ -67,6 +68,7 @@ function setStorage(){
   localStorage.setItem('im-ai-history', JSON.stringify(state.aiHistory.slice(-40)));
   localStorage.setItem('im-ai-open', JSON.stringify(!!state.aiOpen));
   localStorage.setItem('im-ai-pos', JSON.stringify(state.aiPos));
+  localStorage.setItem('im-ai-web', JSON.stringify(!!state.aiWebSearch));
 }
 function allModules(){ return normalizeSections(state.data?.parts); }
 function allResources(){ return normalizeSections(state.data?.resources); }
@@ -752,8 +754,9 @@ function renderAiFloat(){
     <section class="ai-panel card">
       <header class="ai-panel-head" data-ai-drag><div><strong>AI Tutor</strong><span>IPD Brillian KB</span></div><button type="button" data-ai-close>×</button></header>
       <div class="ai-disclaimer">Edukasi. Jangan masukkan data pasien identifikatif.</div>
+      <div class="ai-tools"><button class="ai-web-toggle ${state.aiWebSearch ? 'active' : ''}" type="button" data-ai-web>Web search ${state.aiWebSearch ? 'ON' : 'OFF'}</button></div>
       <div id="aiMessages" class="ai-messages">${renderAiMessages()}</div>
-      <div class="ai-quick"><button data-ai-prompt="Jelaskan topic yang sedang saya buka dengan poin high-yield.">Explain</button><button data-ai-prompt="Buat 5 pertanyaan quiz dari materi ini beserta jawabannya.">Quiz</button><button data-ai-prompt="Ringkas tatalaksana dan red flags paling penting.">Summarize</button></div>
+      <div class="ai-quick"><button type="button" data-ai-prompt="Jelaskan topic/materi ini dengan poin high-yield, patofisiologi singkat, diagnosis, tatalaksana, red flags, dan ringkasan praktis.">Explain</button><button type="button" data-ai-prompt="Buat 5 pertanyaan quiz dari materi ini. Sertakan opsi jawaban, kunci, dan penjelasan singkat tiap nomor.">Quiz</button><button type="button" data-ai-prompt="Ringkas materi ini menjadi bullet point klinis: definisi, diagnosis, tatalaksana, red flags, dan pitfall penting.">Summarize</button></div>
       <form id="aiForm" class="ai-form"><textarea id="aiInput" rows="2" placeholder="Tanya AI Tutor..."></textarea><div class="toolbar ai-actions"><button class="btn primary" type="submit">Ask</button><button class="btn" type="button" data-ai-clear>Clear</button></div></form>
     </section>`;
   document.body.appendChild(box);
@@ -799,11 +802,11 @@ async function submitAiTutor(text){
     const sources = aiLocalSources(message);
     const sourceText = sources.map(s => `[${s.id}] ${s.title} — ${s.section}\nURL: ${s.url}\n${s.text}`).join('\n\n');
     const messages = [
-      {role:'system', content:'You are AI Tutor for IPD Brillian. Answer in Indonesian. Use ONLY supplied local guide sources. Cite claims with [1], [2]. If insufficient, say source is insufficient. Educational use only, not patient-specific medical advice. Be structured and concise.'},
+      {role:'system', content:`You are AI Tutor for IPD Brillian. Answer in Indonesian. ${state.aiWebSearch ? 'Use local guide sources first, then web search if needed for newer/outside references. Cite sources clearly.' : 'Use ONLY supplied local guide sources. Cite claims with [1], [2]. If insufficient, say source is insufficient.'} Educational use only, not patient-specific medical advice. Be structured and concise.`},
       ...state.aiHistory.filter(m => m.content !== 'Thinking...').slice(-8).map(m => ({role:m.role, content:m.content.slice(0,1200)})),
       {role:'user', content:`Question: ${message}\n\nLocal guide sources:\n${sourceText}\n\nFormat: Jawaban singkat, Penjelasan, Sources used.`}
     ];
-    const res = await fetch('/aiTutor', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({messages})});
+    const res = await fetch('/aiTutor', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({messages, webSearch: !!state.aiWebSearch})});
     const data = await res.json();
     state.aiHistory.pop();
     if (!res.ok) throw new Error(data.error || 'AI request failed');
@@ -1049,8 +1052,15 @@ async function init(){
     if (toggleAi) { e.preventDefault(); state.aiNudge = false; state.aiOpen = !state.aiOpen; setStorage(); renderAiFloat(); scheduleAiNudge(); return; }
     const closeAi = e.target.closest('[data-ai-close]');
     if (closeAi) { e.preventDefault(); state.aiOpen = false; setStorage(); renderAiFloat(); return; }
+    const web = e.target.closest('[data-ai-web]');
+    if (web) { e.preventDefault(); state.aiWebSearch = !state.aiWebSearch; setStorage(); renderAiFloat(); return; }
     const prompt = e.target.closest('[data-ai-prompt]');
-    if (prompt) { e.preventDefault(); state.aiOpen = true; submitAiTutor(prompt.dataset.aiPrompt || ''); return; }
+    if (prompt) {
+      e.preventDefault(); state.aiOpen = true;
+      const input = document.getElementById('aiInput');
+      if (input) { input.value = prompt.dataset.aiPrompt || ''; input.focus(); input.setSelectionRange(input.value.length, input.value.length); }
+      return;
+    }
     const clear = e.target.closest('[data-ai-clear]');
     if (clear) { e.preventDefault(); state.aiHistory = []; setStorage(); renderAiFloat(); return; }
     const filter = e.target.closest('[data-search-filter]');
