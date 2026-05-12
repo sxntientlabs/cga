@@ -1,4 +1,7 @@
 {
+  "functions": {
+    "source": "functions"
+  },
   "hosting": {
     "site": "ipdbrilian",
     "public": ".",
@@ -12,6 +15,13 @@
     "cleanUrls": true,
     "trailingSlash": false,
     "rewrites": [
+      {
+        "source": "/aiTutor",
+        "function": {
+          "functionId": "aiTutor",
+          "region": "us-central1"
+        }
+      },
       {
         "source": "**",
         "destination": "/index.html"

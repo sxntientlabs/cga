@@ -684,8 +684,6 @@ function renderBookmarks(){
         </a>`).join('')}</div>` : '<div class="empty">Belum ada bookmark. Buka topic lalu klik ☆ Bookmark.</div>'}
     </div>`;
 }
-const AI_BASE_URL = 'https://rcljvh2.9router.com/v1';
-const AI_MODELS = ['vs/gpt-4o-mini','vr/gpt-4o-mini','va/gpt-4o-mini','oc/minimax-m2.5-free','kc/kilo-auto/free','openrouter/openrouter/free'];
 function renderAiTutor(){
   els.crumbs.textContent = 'AI Tutor';
   els.pageTitle.textContent = 'AI Tutor';
@@ -698,11 +696,7 @@ function renderAiTutor(){
   els.content.innerHTML = `
     <div class="ai-layout">
       <section class="card ai-chat-card">
-        <div class="ai-disclaimer">Untuk edukasi. Jangan masukkan data pasien identifikatif. Bukan pengganti keputusan klinis. API key disimpan lokal di browser.</div>
-        <div class="ai-key-row">
-          <input id="aiKey" type="password" placeholder="Paste API key AI kamu" value="${esc(localStorage.getItem('im-ai-key') || '')}" />
-          <button class="btn" type="button" data-ai-save-key>Save key</button>
-        </div>
+        <div class="ai-disclaimer">Untuk edukasi. Jangan masukkan data pasien identifikatif. Bukan pengganti keputusan klinis.</div>
         <div id="aiMessages" class="ai-messages">${messages}</div>
         <form id="aiForm" class="ai-form">
           <textarea id="aiInput" rows="3" placeholder="Tanya AI Tutor tentang materi internal medicine..."></textarea>
@@ -750,12 +744,6 @@ function aiLocalSources(message){
   }
   return sources;
 }
-async function callAiModel(model, messages, key){
-  const res = await fetch(`${AI_BASE_URL}/chat/completions`, {method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`}, body:JSON.stringify({model, messages, temperature:.2, max_tokens:1400})});
-  const text = await res.text();
-  if (!res.ok) throw new Error(`${model}: ${res.status}`);
-  return JSON.parse(text).choices?.[0]?.message?.content || '';
-}
 async function submitAiTutor(text){
   const message = safeText(text);
   if (!message) return;
@@ -763,8 +751,6 @@ async function submitAiTutor(text){
   state.aiHistory.push({role:'assistant', content:'Thinking...'});
   setStorage(); renderAiTutor();
   try {
-    const key = localStorage.getItem('im-ai-key') || '';
-    if (!key) throw new Error('API key belum diset. Paste key lalu Save key.');
     const sources = aiLocalSources(message);
     const sourceText = sources.map(s => `[${s.id}] ${s.title} — ${s.section}\nURL: ${s.url}\n${s.text}`).join('\n\n');
     const messages = [
@@ -772,14 +758,12 @@ async function submitAiTutor(text){
       ...state.aiHistory.filter(m => m.content !== 'Thinking...').slice(-8).map(m => ({role:m.role, content:m.content.slice(0,1200)})),
       {role:'user', content:`Question: ${message}\n\nLocal guide sources:\n${sourceText}\n\nFormat: Jawaban singkat, Penjelasan, Sources used.`}
     ];
-    let answer = '', used = '';
-    for (const model of AI_MODELS) {
-      try { answer = await callAiModel(model, messages, key); used = model; break; } catch (_) {}
-    }
+    const res = await fetch('/aiTutor', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({messages})});
+    const data = await res.json();
     state.aiHistory.pop();
-    if (!answer) throw new Error('Semua model fallback gagal.');
+    if (!res.ok) throw new Error(data.error || 'AI request failed');
     const cites = sources.map(c => `[${c.id}] ${c.title} — ${c.section} (${c.url})`).join('\n');
-    state.aiHistory.push({role:'assistant', content:`${answer}\n\nModel: ${used}${cites ? `\n\nSources:\n${cites}` : ''}`});
+    state.aiHistory.push({role:'assistant', content:`${data.answer}\n\nModel: ${data.model || 'gpt-5-nano'}${cites ? `\n\nSources:\n${cites}` : ''}`});
   } catch (e) {
     state.aiHistory.pop();
     state.aiHistory.push({role:'assistant', content:`Error: ${e.message || e}`});
@@ -1000,8 +984,6 @@ async function init(){
     }
   });
   if (els.content) els.content.addEventListener('click', e => {
-    const saveKey = e.target.closest('[data-ai-save-key]');
-    if (saveKey) { e.preventDefault(); localStorage.setItem('im-ai-key', document.getElementById('aiKey')?.value || ''); return; }
     const prompt = e.target.closest('[data-ai-prompt]');
     if (prompt) { e.preventDefault(); submitAiTutor(prompt.dataset.aiPrompt || ''); return; }
     const clear = e.target.closest('[data-ai-clear]');
