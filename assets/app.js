@@ -5,6 +5,7 @@ const state = {
   mode: 'home',
   theme: localStorage.getItem('im-theme') || 'light',
   focus: JSON.parse(localStorage.getItem('im-focus') || 'false'),
+  sidebarOpen: JSON.parse(localStorage.getItem('im-sidebar-open') || 'false'),
   bookmarks: new Set(JSON.parse(localStorage.getItem('im-bookmarks') || '[]')),
   done: new Set(JSON.parse(localStorage.getItem('im-done') || '[]')),
   quizState: {},
@@ -26,6 +27,8 @@ const els = {
   modeCga: document.getElementById('modeCga'),
   modeFocus: document.getElementById('modeFocus'),
   modeTheme: document.getElementById('modeTheme'),
+  sidebarToggle: document.getElementById('sidebarToggle'),
+  sidebarBackdrop: document.getElementById('sidebarBackdrop'),
 };
 
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
@@ -36,6 +39,7 @@ function setStorage(){
   localStorage.setItem('im-bookmarks', JSON.stringify([...state.bookmarks]));
   localStorage.setItem('im-done', JSON.stringify([...state.done]));
   localStorage.setItem('im-focus', JSON.stringify(!!state.focus));
+  localStorage.setItem('im-sidebar-open', JSON.stringify(!!state.sidebarOpen));
   localStorage.setItem('im-theme', state.theme);
 }
 function allModules(){ return normalizeSections(state.data?.parts); }
@@ -83,6 +87,9 @@ function setTheme(){
 function setFocus(){
   document.body.classList.toggle('focus-mode', !!state.focus);
   if (els.modeFocus) els.modeFocus.classList.toggle('active', !!state.focus);
+}
+function setSidebar(){
+  document.body.classList.toggle('sidebar-open', !!state.sidebarOpen);
 }
 function setRoute(){
   state.route = location.hash.replace(/^#/, '') || 'home';
@@ -359,20 +366,30 @@ function renderCgaBrillianResource(page){
   els.pageSubtitle.textContent = 'Integrated CGA assessment inside LMS Wiki';
   const src = './cga-brillian/index.html';
   els.content.innerHTML = `
-    <div class="section-card cga-embed-card">
-      <div class="article-head" style="margin-bottom:14px">
-        <div>
-          <span class="badge">Interactive feature</span>
-          <h2 style="margin-top:10px">CGA Brillian</h2>
-          <p>${esc(page.intro?.[0]?.text || 'Comprehensive Geriatric Assessment terintegrasi langsung ke LMS Wiki.')}</p>
+    <div class="view-grid cga-view">
+      <article class="card article cga-embed-card">
+        <div class="article-head">
+          <div>
+            <span class="badge">Interactive feature</span>
+            <h2 style="margin-top:10px">CGA Brillian</h2>
+            <p>${esc(page.intro?.[0]?.text || 'Comprehensive Geriatric Assessment terintegrasi langsung ke LMS Wiki.')}</p>
+          </div>
+          <div class="toolbar" style="margin:0;justify-content:flex-end">
+            <a class="btn primary" href="${src}" target="_blank" rel="noreferrer">Open full page</a>
+          </div>
         </div>
-        <div class="toolbar" style="margin:0;justify-content:flex-end">
-          <a class="btn primary" href="${src}" target="_blank" rel="noreferrer">Open full page</a>
+        <div class="cga-intro">
+          <div class="note">CGA ini tetap satu paket dengan IPD Brillian, tapi bisa dibuka full page kalau mau input lebih nyaman.</div>
+          <div class="resource-frame">
+            <iframe src="${src}" title="CGA Brillian" loading="lazy"></iframe>
+          </div>
         </div>
-      </div>
-      <div class="resource-frame">
-        <iframe src="${src}" title="CGA Brillian" loading="lazy"></iframe>
-      </div>
+      </article>
+      <aside class="card toc">
+        <h4>Quick actions</h4>
+        <a href="#home">Back home</a>
+        <a href="${src}" target="_blank" rel="noreferrer">Open full page</a>
+      </aside>
     </div>`;
 }
 function buildQuiz(topic){
@@ -518,6 +535,7 @@ function render(){
   updateStats();
   setTheme();
   setFocus();
+  setSidebar();
   renderNav();
   const route = parseRoute();
   els.modeHome.classList.toggle('active', state.mode === 'home');
@@ -525,10 +543,10 @@ function render(){
   els.modeReview.classList.toggle('active', state.mode === 'review');
   if (els.modeCga) els.modeCga.classList.toggle('active', route.type === 'resource' && route.slug === 'cga-brillian');
   const q = state.search.trim();
-  if (state.mode === 'review') return renderReview();
   if (route.type === 'topic') return renderTopic(route.slug);
   if (route.type === 'resource') return renderResource(route.slug);
   if (route.type === 'part') return renderPart(route.slug);
+  if (route.type === 'home' && state.mode === 'review') return renderReview();
   if (q.length >= 2) {
     els.crumbs.textContent = 'Search';
     els.pageTitle.textContent = 'Search results';
@@ -549,7 +567,7 @@ function renderHomeBody(){
       <span class="badge">${part.topics.length} topics</span>
       <span class="card-arrow">↗</span>
       <h3>${esc(part.display)}</h3>
-      <p>${esc(first.display)} → ${esc(last.display)}</p>
+      <p>${esc(safeText(first.display, first.title || 'Topic'))} → ${esc(safeText(last.display, last.title || 'Topic'))}</p>
     </div>`;
   }).join('');
   const next = topics.find(t => !state.done.has(topicKey(t.partSlug, t.slug))) || topics[0];
@@ -581,6 +599,7 @@ function renderHomeBody(){
         <p style="color:var(--muted);line-height:1.6">Lanjutkan ke topic berikutnya atau buka module yang kamu mau.</p>
         <div class="toolbar">
           <a class="btn primary" href="#topic/${next.slug}">Start / Continue</a>
+          <a class="btn" href="#resource/cga-brillian">Open CGA</a>
           <button class="btn" id="resetDone">Reset progress</button>
         </div>
         <div class="note">Tip: pakai search untuk loncat ke diagnosis, obat, protocol, atau section spesifik.</div>
@@ -596,7 +615,10 @@ function renderHomeBody(){
     </div>`;
 }
 function bindHomeCards(){
-  document.querySelectorAll('[data-href]').forEach(el => el.onclick = () => location.hash = el.dataset.href);
+  document.querySelectorAll('[data-href]').forEach(el => el.onclick = () => {
+    location.hash = el.dataset.href;
+    if (window.matchMedia('(max-width: 720px)').matches) { state.sidebarOpen = false; setStorage(); setSidebar(); }
+  });
   const resetBtn = document.getElementById('resetDone');
   if (resetBtn) resetBtn.onclick = () => { state.done.clear(); setStorage(); updateStats(); render(); };
 }
@@ -627,7 +649,17 @@ async function init(){
   els.modeHome.onclick = () => { state.mode = 'home'; render(); };
   els.modeStudy.onclick = () => { state.mode = 'study'; render(); };
   els.modeReview.onclick = () => { state.mode = 'review'; render(); };
-  if (els.modeCga) els.modeCga.onclick = () => { location.hash = '#resource/cga-brillian'; };
+  if (els.modeCga) els.modeCga.onclick = () => { state.mode = 'home'; location.hash = '#resource/cga-brillian'; };
+  if (els.sidebarToggle) els.sidebarToggle.onclick = () => { state.sidebarOpen = !state.sidebarOpen; setStorage(); setSidebar(); };
+  if (els.sidebarBackdrop) els.sidebarBackdrop.onclick = () => { state.sidebarOpen = false; setStorage(); setSidebar(); };
+  if (els.nav) els.nav.addEventListener('click', e => {
+    const link = e.target.closest('a');
+    if (link && window.matchMedia('(max-width: 720px)').matches) {
+      state.sidebarOpen = false;
+      setStorage();
+      setSidebar();
+    }
+  });
   window.addEventListener('hashchange', setRoute);
   setTheme();
   setFocus();
