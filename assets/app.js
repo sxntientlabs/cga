@@ -80,6 +80,12 @@ function normalizeData(data){
     intro: normalizeBlocks(page.intro),
     sections: normalizeSections(page.sections).map(sec => ({...sec, blocks: normalizeBlocks(sec.blocks)})),
   }));
+  if (!out.resources.some(page => page.slug === 'cga-brillian')) {
+    out.resources.unshift({
+      kind:'resource', title:'Clinical Tools', display:'Clinical Tools', slug:'cga-brillian', searchText:'clinical tools cga ttv frailty vital signs',
+      intro:[{type:'p', text:'CGA dan TTV terintegrasi langsung ke LMS Wiki.'}], sections:[]
+    });
+  }
   return out;
 }
 function allTopics(){ return allModules().flatMap(p => normalizeSections(p.topics).map(t => ({...t, part: p}))); }
