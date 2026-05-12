@@ -9,6 +9,7 @@ const state = {
   sidebarOpen: JSON.parse(localStorage.getItem('im-sidebar-open') || 'false'),
   bookmarks: new Set(JSON.parse(localStorage.getItem('im-bookmarks') || '[]')),
   done: new Set(JSON.parse(localStorage.getItem('im-done') || '[]')),
+  aiHistory: JSON.parse(localStorage.getItem('im-ai-history') || '[]'),
   quizState: {},
 };
 
@@ -27,6 +28,7 @@ const els = {
   modeStudy: document.getElementById('modeStudy'),
   modeReview: document.getElementById('modeReview'),
   modeCga: document.getElementById('modeCga'),
+  modeAi: document.getElementById('modeAi'),
   modeFocus: document.getElementById('modeFocus'),
   modeTheme: document.getElementById('modeTheme'),
   sidebarToggle: document.getElementById('sidebarToggle'),
@@ -37,6 +39,7 @@ const els = {
   mobileStudy: document.getElementById('mobileStudy'),
   mobileReview: document.getElementById('mobileReview'),
   mobileCga: document.getElementById('mobileCga'),
+  mobileAi: document.getElementById('mobileAi'),
   mobileTheme: document.getElementById('mobileTheme'),
 };
 
@@ -58,6 +61,7 @@ function setStorage(){
   localStorage.setItem('im-focus', JSON.stringify(!!state.focus));
   localStorage.setItem('im-sidebar-open', JSON.stringify(!!state.sidebarOpen));
   localStorage.setItem('im-theme', state.theme);
+  localStorage.setItem('im-ai-history', JSON.stringify(state.aiHistory.slice(-40)));
 }
 function allModules(){ return normalizeSections(state.data?.parts); }
 function allResources(){ return normalizeSections(state.data?.resources); }
@@ -139,11 +143,13 @@ function setSidebar(){
 function setMobileDock(){
   const route = parseRoute();
   const activeResource = route.type === 'resource' && route.slug === 'cga-brillian';
+  const activeAi = route.type === 'ai';
   const toggle = (el, active) => { if (el) el.classList.toggle('active', !!active); };
-  toggle(els.mobileHome, state.mode === 'home' && !activeResource);
+  toggle(els.mobileHome, state.mode === 'home' && !activeResource && !activeAi);
   toggle(els.mobileStudy, state.mode === 'study');
   toggle(els.mobileReview, state.mode === 'review');
   toggle(els.mobileCga, activeResource);
+  toggle(els.mobileAi, activeAi);
 }
 function syncSearchInputs(value){
   if (els.search && els.search.value !== value) els.search.value = value;
@@ -172,6 +178,7 @@ function parseRoute(){
   if (parts[0] === 'topic' && slugPart) return {type:'topic', slug: slugPart, anchor};
   if (parts[0] === 'resource' && slugPart) return {type:'resource', slug: slugPart, anchor};
   if (parts[0] === 'bookmarks') return {type:'bookmarks'};
+  if (parts[0] === 'ai-tutor') return {type:'ai'};
   return {type:'home'};
 }
 function summaryFromBlocks(blocks){
@@ -677,6 +684,108 @@ function renderBookmarks(){
         </a>`).join('')}</div>` : '<div class="empty">Belum ada bookmark. Buka topic lalu klik ☆ Bookmark.</div>'}
     </div>`;
 }
+const AI_BASE_URL = 'https://rcljvh2.9router.com/v1';
+const AI_MODELS = ['vs/gpt-4o-mini','vr/gpt-4o-mini','va/gpt-4o-mini','oc/minimax-m2.5-free','kc/kilo-auto/free','openrouter/openrouter/free'];
+function renderAiTutor(){
+  els.crumbs.textContent = 'AI Tutor';
+  els.pageTitle.textContent = 'AI Tutor';
+  els.pageSubtitle.textContent = 'Tanya materi IPD Brillian; jawaban dicite dari knowledge base lokal.';
+  const messages = state.aiHistory.map(m => `
+    <div class="ai-msg ${m.role}">
+      <div class="ai-role">${m.role === 'assistant' ? 'AI Tutor' : 'You'}</div>
+      <div class="ai-text">${esc(m.content)}</div>
+    </div>`).join('') || `<div class="ai-empty">Belum ada chat. Coba: “jelaskan sepsis hour-1 bundle”.</div>`;
+  els.content.innerHTML = `
+    <div class="ai-layout">
+      <section class="card ai-chat-card">
+        <div class="ai-disclaimer">Untuk edukasi. Jangan masukkan data pasien identifikatif. Bukan pengganti keputusan klinis. API key disimpan lokal di browser.</div>
+        <div class="ai-key-row">
+          <input id="aiKey" type="password" placeholder="Paste API key AI kamu" value="${esc(localStorage.getItem('im-ai-key') || '')}" />
+          <button class="btn" type="button" data-ai-save-key>Save key</button>
+        </div>
+        <div id="aiMessages" class="ai-messages">${messages}</div>
+        <form id="aiForm" class="ai-form">
+          <textarea id="aiInput" rows="3" placeholder="Tanya AI Tutor tentang materi internal medicine..."></textarea>
+          <div class="toolbar ai-actions">
+            <button class="btn primary" type="submit">Ask</button>
+            <button class="btn" type="button" data-ai-clear>Clear history</button>
+          </div>
+        </form>
+      </section>
+      <aside class="card toc ai-source-panel">
+        <h4>Quick prompts</h4>
+        <a href="#" data-ai-prompt="Jelaskan topic yang sedang saya buka dengan poin high-yield.">Explain current topic</a>
+        <a href="#" data-ai-prompt="Buat 5 pertanyaan quiz dari materi ini beserta jawabannya.">Quiz me</a>
+        <a href="#" data-ai-prompt="Ringkas tatalaksana dan red flags paling penting.">Summarize management</a>
+        <p class="ai-small">Citation lokal muncul sebagai [1], [2], dst, sesuai section di guide.</p>
+      </aside>
+    </div>`;
+  document.getElementById('aiMessages')?.scrollTo(0, 999999);
+}
+function blockText(blocks){
+  return normalizeBlocks(blocks).map(b => {
+    if (b.type === 'table') return normalizeSections(b.rows).map(r => normalizeSections(r).join(' | ')).join('\n');
+    if (b.type === 'bullet') return `- ${safeText(b.text,'')}`;
+    if (b.type === 'num') return `1. ${safeText(b.text,'')}`;
+    return safeText(b.text,'');
+  }).filter(Boolean).join('\n');
+}
+function aiLocalSources(message){
+  const hits = searchAll(message).slice(0, 8);
+  const sources = [];
+  for (const h of hits) {
+    let item = null;
+    if (h.href.startsWith('#topic/')) {
+      const [slug, anchor] = h.href.replace('#topic/','').split('#sec-');
+      const t = allTopics().find(x => x.slug === slug);
+      const sec = anchor ? normalizeSections(t?.sections).find(s => s.slug === anchor) : normalizeSections(t?.sections)[0];
+      if (t && sec) item = {title:t.display, section:sec.title, url:h.href, text:blockText(sec.blocks)};
+    } else if (h.href.startsWith('#resource/')) {
+      const [slug, anchor] = h.href.replace('#resource/','').split('#sec-');
+      const p = allResources().find(x => x.slug === slug);
+      const sec = anchor ? normalizeSections(p?.sections).find(s => s.slug === anchor) : null;
+      item = sec ? {title:p.display, section:sec.title, url:h.href, text:blockText(sec.blocks)} : {title:p?.display, section:'Overview', url:h.href, text:blockText(p?.intro)};
+    }
+    if (item?.text) sources.push({...item, id:sources.length+1, text:item.text.slice(0,2600)});
+  }
+  return sources;
+}
+async function callAiModel(model, messages, key){
+  const res = await fetch(`${AI_BASE_URL}/chat/completions`, {method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`}, body:JSON.stringify({model, messages, temperature:.2, max_tokens:1400})});
+  const text = await res.text();
+  if (!res.ok) throw new Error(`${model}: ${res.status}`);
+  return JSON.parse(text).choices?.[0]?.message?.content || '';
+}
+async function submitAiTutor(text){
+  const message = safeText(text);
+  if (!message) return;
+  state.aiHistory.push({role:'user', content:message});
+  state.aiHistory.push({role:'assistant', content:'Thinking...'});
+  setStorage(); renderAiTutor();
+  try {
+    const key = localStorage.getItem('im-ai-key') || '';
+    if (!key) throw new Error('API key belum diset. Paste key lalu Save key.');
+    const sources = aiLocalSources(message);
+    const sourceText = sources.map(s => `[${s.id}] ${s.title} — ${s.section}\nURL: ${s.url}\n${s.text}`).join('\n\n');
+    const messages = [
+      {role:'system', content:'You are AI Tutor for IPD Brillian. Answer in Indonesian. Use ONLY supplied local guide sources. Cite claims with [1], [2]. If insufficient, say source is insufficient. Educational use only, not patient-specific medical advice. Be structured and concise.'},
+      ...state.aiHistory.filter(m => m.content !== 'Thinking...').slice(-8).map(m => ({role:m.role, content:m.content.slice(0,1200)})),
+      {role:'user', content:`Question: ${message}\n\nLocal guide sources:\n${sourceText}\n\nFormat: Jawaban singkat, Penjelasan, Sources used.`}
+    ];
+    let answer = '', used = '';
+    for (const model of AI_MODELS) {
+      try { answer = await callAiModel(model, messages, key); used = model; break; } catch (_) {}
+    }
+    state.aiHistory.pop();
+    if (!answer) throw new Error('Semua model fallback gagal.');
+    const cites = sources.map(c => `[${c.id}] ${c.title} — ${c.section} (${c.url})`).join('\n');
+    state.aiHistory.push({role:'assistant', content:`${answer}\n\nModel: ${used}${cites ? `\n\nSources:\n${cites}` : ''}`});
+  } catch (e) {
+    state.aiHistory.pop();
+    state.aiHistory.push({role:'assistant', content:`Error: ${e.message || e}`});
+  }
+  setStorage(); renderAiTutor();
+}
 function renderStudy(){
   els.crumbs.textContent = 'Study';
   els.pageTitle.textContent = 'Study mode';
@@ -713,6 +822,7 @@ function render(){
   els.modeStudy.classList.toggle('active', state.mode === 'study');
   els.modeReview.classList.toggle('active', state.mode === 'review');
   if (els.modeCga) els.modeCga.classList.toggle('active', route.type === 'resource' && route.slug === 'cga-brillian');
+  if (els.modeAi) els.modeAi.classList.toggle('active', route.type === 'ai');
   const q = state.search.trim();
   if (q.length >= 2) {
     els.crumbs.textContent = 'Search';
@@ -726,6 +836,7 @@ function render(){
   if (route.type === 'resource') return renderResource(route.slug);
   if (route.type === 'part') return renderPart(route.slug);
   if (route.type === 'bookmarks') return renderBookmarks();
+  if (route.type === 'ai') return renderAiTutor();
   if (route.type === 'home' && state.mode === 'review') return renderReview();
   if (route.type === 'home' && state.mode === 'study') return renderStudy();
   return renderHome();
@@ -870,6 +981,7 @@ async function init(){
   els.modeStudy.onclick = () => goHomeMode('study');
   els.modeReview.onclick = () => goHomeMode('review');
   if (els.modeCga) els.modeCga.onclick = () => { state.mode = 'home'; location.hash = '#resource/cga-brillian'; };
+  if (els.modeAi) els.modeAi.onclick = () => { state.mode = 'home'; state.search = ''; syncSearchInputs(''); location.hash = '#ai-tutor'; };
   if (els.bookmarkCard) els.bookmarkCard.onclick = () => { state.search = ''; syncSearchInputs(''); location.hash = '#bookmarks'; };
   if (els.sidebarToggle) els.sidebarToggle.onclick = () => { state.sidebarOpen = !state.sidebarOpen; setStorage(); setSidebar(); };
   if (els.sidebarBackdrop) els.sidebarBackdrop.onclick = () => { state.sidebarOpen = false; setStorage(); setSidebar(); };
@@ -877,9 +989,23 @@ async function init(){
   if (els.mobileStudy) els.mobileStudy.onclick = () => goHomeMode('study');
   if (els.mobileReview) els.mobileReview.onclick = () => goHomeMode('review');
   if (els.mobileCga) els.mobileCga.onclick = () => { state.mode = 'home'; location.hash = '#resource/cga-brillian'; };
+  if (els.mobileAi) els.mobileAi.onclick = () => { state.mode = 'home'; state.search = ''; syncSearchInputs(''); location.hash = '#ai-tutor'; };
   if (els.mobileTheme) els.mobileTheme.onclick = () => { state.theme = state.theme === 'dark' ? 'light' : 'dark'; setStorage(); setTheme(); };
   if (els.mobileThemeInline) els.mobileThemeInline.onclick = () => { state.theme = state.theme === 'dark' ? 'light' : 'dark'; setStorage(); setTheme(); };
+  if (els.content) els.content.addEventListener('submit', e => {
+    if (e.target?.id === 'aiForm') {
+      e.preventDefault();
+      const input = document.getElementById('aiInput');
+      submitAiTutor(input?.value || '');
+    }
+  });
   if (els.content) els.content.addEventListener('click', e => {
+    const saveKey = e.target.closest('[data-ai-save-key]');
+    if (saveKey) { e.preventDefault(); localStorage.setItem('im-ai-key', document.getElementById('aiKey')?.value || ''); return; }
+    const prompt = e.target.closest('[data-ai-prompt]');
+    if (prompt) { e.preventDefault(); submitAiTutor(prompt.dataset.aiPrompt || ''); return; }
+    const clear = e.target.closest('[data-ai-clear]');
+    if (clear) { e.preventDefault(); state.aiHistory = []; setStorage(); renderAiTutor(); return; }
     const filter = e.target.closest('[data-search-filter]');
     if (filter) {
       e.preventDefault();
