@@ -255,7 +255,7 @@ function renderHome(){
   const done = topicDoneCount();
   const searchBlock = state.search.trim().length >= 2 ? renderSearchResults(state.search.trim()) : '';
   els.crumbs.textContent = 'Home';
-  els.pageTitle.textContent = 'Internal Medicine Wiki LMS';
+  els.pageTitle.textContent = 'IPD Brillian';
   els.pageSubtitle.textContent = 'Rapi, cepat dicari, dan fokus ke inti high-yield.';
   els.content.innerHTML = `
     ${searchBlock}
@@ -602,7 +602,7 @@ function bindHomeCards(){
 }
 function renderHome(){
   els.crumbs.textContent = 'Home';
-  els.pageTitle.textContent = 'Internal Medicine Wiki LMS';
+  els.pageTitle.textContent = 'IPD Brillian';
   els.pageSubtitle.textContent = 'Belajar lebih enak: rapi, searchable, dan bisa tracking progress.';
   els.content.innerHTML = state.search.trim().length >= 2 ? renderSearchResults(state.search.trim()) + renderHomeBody() : renderHomeBody();
   bindHomeCards();
