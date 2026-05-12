@@ -21,6 +21,7 @@ const els = {
   progressLabel: document.getElementById('progressLabel'),
   progressBar: document.getElementById('progressBar'),
   bookmarkCount: document.getElementById('bookmarkCount'),
+  bookmarkCard: document.getElementById('bookmarkCard'),
   modeHome: document.getElementById('modeHome'),
   modeStudy: document.getElementById('modeStudy'),
   modeReview: document.getElementById('modeReview'),
@@ -163,6 +164,7 @@ function parseRoute(){
   if (parts[0] === 'part' && slugPart) return {type:'part', slug: slugPart, anchor};
   if (parts[0] === 'topic' && slugPart) return {type:'topic', slug: slugPart, anchor};
   if (parts[0] === 'resource' && slugPart) return {type:'resource', slug: slugPart, anchor};
+  if (parts[0] === 'bookmarks') return {type:'bookmarks'};
   return {type:'home'};
 }
 function summaryFromBlocks(blocks){
@@ -437,7 +439,7 @@ function renderResource(slug){
   const intro = page.intro?.length ? `<div class="section-card" id="sec-overview"><h3>Overview</h3>${renderBlocks(page.intro)}</div>` : '';
   const sections = pageSections.map(sec => `<div class="section-card" id="sec-${sec.slug}"><h3>${esc(cleanSectionTitle(sec.display || sec.title))}</h3>${renderBlocks(sec.blocks)}</div>`).join('');
   const tocSections = pageSections.length ? pageSections : [{slug:'overview', display:'Overview', blocks: page.intro || []}];
-  const toc = tocSections.map(sec => `<a href="#resource/${page.slug}#sec-${sec.slug}">${esc(safeText(sec.display, 'Section'))}</a>`).join('');
+  const toc = tocSections.map(sec => `<a href="#resource/${page.slug}#sec-${sec.slug}">${esc(cleanSectionTitle(sec.display || sec.title))}</a>`).join('');
   els.content.innerHTML = `
     <div class="view-grid">
       <article class="card article">
@@ -454,7 +456,7 @@ function renderResource(slug){
       </article>
       <aside class="card toc">
         <h4>On this page</h4>
-        <a href="#top">Top</a>
+        <a href="#resource/${page.slug}">Top</a>
         ${toc}
       </aside>
     </div>`;
@@ -575,7 +577,7 @@ function renderTopic(slug){
   const done = state.done.has(key);
   const sections = topic.sections.map(sec => `<div class="section-card" id="sec-${sec.slug}"><h3>${esc(cleanSectionTitle(sec.title))}</h3>${renderBlocks(sec.blocks)}</div>`).join('');
   const intro = topic.intro.length ? `<div class="section-card"><h3>Overview</h3>${renderBlocks(topic.intro)}</div>` : '';
-  const toc = topic.sections.map(sec => `<a href="#sec-${sec.slug}">${esc(cleanSectionTitle(sec.title))}</a>`).join('');
+  const toc = topic.sections.map(sec => `<a href="#topic/${topic.slug}#sec-${sec.slug}">${esc(cleanSectionTitle(sec.title))}</a>`).join('');
   els.crumbs.textContent = `Home / ${safeText(topic.partTitle, 'Module')} / ${topic.display}`;
   els.pageTitle.textContent = topic.display;
   els.pageSubtitle.textContent = `${sectionLabel(topic.sectionCount)} · ${safeText(topic.partTitle, 'Module')} · high-yield review`;
@@ -599,7 +601,7 @@ function renderTopic(slug){
       </article>
       <aside class="card toc">
         <h4>On this page</h4>
-        <a href="#top">Top</a>
+        <a href="#topic/${topic.slug}">Top</a>
         ${toc}
         <div style="height:12px"></div>
         <div class="note">Progress button buat tracking, search buat lompat cepat ke topik tertentu.</div>
@@ -656,6 +658,22 @@ function renderReview(){
     <div class="toolbar">${pendingTopics.map(t => `<a class="badge" href="#topic/${t.slug}">${esc(safeText(t.display, 'Topic'))}</a>`).join('') || '<div class="empty">Semua topik sudah selesai 🎉</div>'}</div>
   `;
 }
+function renderBookmarks(){
+  const topics = allTopics().filter(t => state.bookmarks.has(topicKey(t.partSlug, t.slug)));
+  els.crumbs.textContent = 'Bookmarks';
+  els.pageTitle.textContent = 'Bookmarked pages';
+  els.pageSubtitle.textContent = topics.length ? `${topics.length} halaman tersimpan` : 'Belum ada halaman yang dibookmark.';
+  els.content.innerHTML = `
+    <div class="card pad bookmark-page">
+      <span class="badge">Bookmarks</span>
+      <h3 style="margin:10px 0 8px">Halaman yang kamu simpan</h3>
+      ${topics.length ? `<div class="bookmark-list">${topics.map(t => `
+        <a class="bookmark-hit" href="#topic/${t.slug}">
+          <strong>${esc(safeText(t.display, t.title || 'Topic'))}</strong>
+          <span>${esc(safeText(t.partTitle, 'Module'))} · ${sectionLabel(t.sectionCount || normalizeSections(t.sections).length)}</span>
+        </a>`).join('')}</div>` : '<div class="empty">Belum ada bookmark. Buka topic lalu klik ☆ Bookmark.</div>'}
+    </div>`;
+}
 function renderStudy(){
   els.crumbs.textContent = 'Study';
   els.pageTitle.textContent = 'Study mode';
@@ -704,6 +722,7 @@ function render(){
   if (route.type === 'topic') return renderTopic(route.slug);
   if (route.type === 'resource') return renderResource(route.slug);
   if (route.type === 'part') return renderPart(route.slug);
+  if (route.type === 'bookmarks') return renderBookmarks();
   if (route.type === 'home' && state.mode === 'review') return renderReview();
   if (route.type === 'home' && state.mode === 'study') return renderStudy();
   return renderHome();
@@ -848,6 +867,7 @@ async function init(){
   els.modeStudy.onclick = () => goHomeMode('study');
   els.modeReview.onclick = () => goHomeMode('review');
   if (els.modeCga) els.modeCga.onclick = () => { state.mode = 'home'; location.hash = '#resource/cga-brillian'; };
+  if (els.bookmarkCard) els.bookmarkCard.onclick = () => { state.search = ''; syncSearchInputs(''); location.hash = '#bookmarks'; };
   if (els.sidebarToggle) els.sidebarToggle.onclick = () => { state.sidebarOpen = !state.sidebarOpen; setStorage(); setSidebar(); };
   if (els.sidebarBackdrop) els.sidebarBackdrop.onclick = () => { state.sidebarOpen = false; setStorage(); setSidebar(); };
   if (els.mobileHome) els.mobileHome.onclick = () => goHomeMode('home');
