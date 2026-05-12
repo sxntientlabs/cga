@@ -6,7 +6,9 @@
     "resources": 9,
     "resourceSections": 26,
     "sections": 566,
-    "blocks": 5452
+    "blocks": 5452,
+    "tablesNormalized": 7,
+    "autoTables": 15
   },
   "parts": [
     {
@@ -151,52 +153,29 @@
                   "text": "Treatment indications vary by guideline (see table below)"
                 },
                 {
-                  "type": "p",
-                  "text": "Guideline"
-                },
-                {
-                  "type": "p",
-                  "text": "HBeAg+ Treatment Threshold"
-                },
-                {
-                  "type": "p",
-                  "text": "HBeAg− Treatment Threshold"
-                },
-                {
-                  "type": "p",
-                  "text": "AASLD 2018"
-                },
-                {
-                  "type": "p",
-                  "text": "DNA >20,000 + ALT ≥2× ULN"
-                },
-                {
-                  "type": "p",
-                  "text": "DNA >2,000 + ALT ≥2× ULN"
-                },
-                {
-                  "type": "p",
-                  "text": "EASL 2025"
-                },
-                {
-                  "type": "p",
-                  "text": "DNA >2,000 + ALT >ULN"
-                },
-                {
-                  "type": "p",
-                  "text": "DNA >2,000 + ALT >ULN"
-                },
-                {
-                  "type": "p",
-                  "text": "WHO 2024"
-                },
-                {
-                  "type": "p",
-                  "text": "Fibrosis ≥F2 regardless; or DNA ≥2,000 + ALT >ULN"
-                },
-                {
-                  "type": "p",
-                  "text": "Same"
+                  "type": "table",
+                  "rows": [
+                    [
+                      "Guideline",
+                      "HBeAg+ Treatment Threshold",
+                      "HBeAg− Treatment Threshold"
+                    ],
+                    [
+                      "AASLD 2018",
+                      "DNA >20,000 + ALT ≥2× ULN",
+                      "DNA >2,000 + ALT ≥2× ULN"
+                    ],
+                    [
+                      "EASL 2025",
+                      "DNA >2,000 + ALT >ULN",
+                      "DNA >2,000 + ALT >ULN"
+                    ],
+                    [
+                      "WHO 2024",
+                      "Fibrosis ≥F2 regardless; or DNA ≥2,000 + ALT >ULN",
+                      "Same"
+                    ]
+                  ]
                 },
                 {
                   "type": "p",
@@ -214,60 +193,37 @@
               "slug": "7-interpretation-of-important-labs",
               "blocks": [
                 {
-                  "type": "p",
-                  "text": "Marker"
-                },
-                {
-                  "type": "p",
-                  "text": "Meaning"
-                },
-                {
-                  "type": "p",
-                  "text": "HBsAg+"
-                },
-                {
-                  "type": "p",
-                  "text": "Active infection"
-                },
-                {
-                  "type": "p",
-                  "text": "Anti-HBs+"
-                },
-                {
-                  "type": "p",
-                  "text": "Immunity (vaccine or natural)"
-                },
-                {
-                  "type": "p",
-                  "text": "Anti-HBc IgM+"
-                },
-                {
-                  "type": "p",
-                  "text": "Acute infection"
-                },
-                {
-                  "type": "p",
-                  "text": "Anti-HBc total+ only"
-                },
-                {
-                  "type": "p",
-                  "text": "Past infection (occult HBV possible)"
-                },
-                {
-                  "type": "p",
-                  "text": "HBeAg+"
-                },
-                {
-                  "type": "p",
-                  "text": "High replication, high infectivity"
-                },
-                {
-                  "type": "p",
-                  "text": "Anti-HBe+"
-                },
-                {
-                  "type": "p",
-                  "text": "Lower replication (but not always)"
+                  "type": "table",
+                  "rows": [
+                    [
+                      "Marker",
+                      "Meaning"
+                    ],
+                    [
+                      "HBsAg+",
+                      "Active infection"
+                    ],
+                    [
+                      "Anti-HBs+",
+                      "Immunity (vaccine or natural)"
+                    ],
+                    [
+                      "Anti-HBc IgM+",
+                      "Acute infection"
+                    ],
+                    [
+                      "Anti-HBc total+ only",
+                      "Past infection (occult HBV possible)"
+                    ],
+                    [
+                      "HBeAg+",
+                      "High replication, high infectivity"
+                    ],
+                    [
+                      "Anti-HBe+",
+                      "Lower replication (but not always)"
+                    ]
+                  ]
                 }
               ]
             },
@@ -319,64 +275,34 @@
               "slug": "10-medication-summary-table",
               "blocks": [
                 {
-                  "type": "p",
-                  "text": "Drug"
-                },
-                {
-                  "type": "p",
-                  "text": "Dose"
-                },
-                {
-                  "type": "p",
-                  "text": "Key Points"
-                },
-                {
-                  "type": "p",
-                  "text": "Tenofovir DF (TDF)"
-                },
-                {
-                  "type": "p",
-                  "text": "300 mg daily"
-                },
-                {
-                  "type": "p",
-                  "text": "Avoid in renal/bone disease; safe in pregnancy"
-                },
-                {
-                  "type": "p",
-                  "text": "Tenofovir AF (TAF)"
-                },
-                {
-                  "type": "p",
-                  "text": "25 mg daily"
-                },
-                {
-                  "type": "p",
-                  "text": "Better renal/bone profile; avoid if CrCl 15 not on dialysis"
-                },
-                {
-                  "type": "p",
-                  "text": "Entecavir (ETV)"
-                },
-                {
-                  "type": "p",
-                  "text": "0.5 mg daily (1 mg if prior lamivudine)"
-                },
-                {
-                  "type": "p",
-                  "text": "Avoid in pregnancy; avoid if prior lamivudine resistance"
-                },
-                {
-                  "type": "p",
-                  "text": "PEG-IFN α-2a"
-                },
-                {
-                  "type": "p",
-                  "text": "180 mcg/week × 48 weeks"
-                },
-                {
-                  "type": "p",
-                  "text": "Finite therapy; contraindicated in decompensated cirrhosis"
+                  "type": "table",
+                  "rows": [
+                    [
+                      "Drug",
+                      "Dose",
+                      "Key Points"
+                    ],
+                    [
+                      "Tenofovir DF (TDF)",
+                      "300 mg daily",
+                      "Avoid in renal/bone disease; safe in pregnancy"
+                    ],
+                    [
+                      "Tenofovir AF (TAF)",
+                      "25 mg daily",
+                      "Better renal/bone profile; avoid if CrCl 15 not on dialysis"
+                    ],
+                    [
+                      "Entecavir (ETV)",
+                      "0.5 mg daily (1 mg if prior lamivudine)",
+                      "Avoid in pregnancy; avoid if prior lamivudine resistance"
+                    ],
+                    [
+                      "PEG-IFN α-2a",
+                      "180 mcg/week × 48 weeks",
+                      "Finite therapy; contraindicated in decompensated cirrhosis"
+                    ]
+                  ]
                 }
               ]
             },
@@ -1792,52 +1718,33 @@
               "slug": "10-medication-table",
               "blocks": [
                 {
-                  "type": "p",
-                  "text": "Drug"
-                },
-                {
-                  "type": "p",
-                  "text": "Dose"
-                },
-                {
-                  "type": "p",
-                  "text": "Mechanism"
-                },
-                {
-                  "type": "p",
-                  "text": "Lactulose"
-                },
-                {
-                  "type": "p",
-                  "text": "20–30 mL 2–3×/day"
-                },
-                {
-                  "type": "p",
-                  "text": "Osmotic laxative; acidifies colon → NH₃ → NH₄⁺ (trapped)"
-                },
-                {
-                  "type": "p",
-                  "text": "Rifaximin"
-                },
-                {
-                  "type": "p",
-                  "text": "550 mg BID"
-                },
-                {
-                  "type": "p",
-                  "text": "Non-absorbable antibiotic; reduces ammonia-producing bacteria"
-                },
-                {
-                  "type": "p",
-                  "text": "L-ornithine L-aspartate"
-                },
-                {
-                  "type": "p",
-                  "text": "20 g/day IV"
-                },
-                {
-                  "type": "p",
-                  "text": "Enhances urea cycle (adjunctive)"
+                  "type": "table",
+                  "rows": [
+                    [
+                      "Drug",
+                      "Dose"
+                    ],
+                    [
+                      "Mechanism",
+                      "Lactulose"
+                    ],
+                    [
+                      "20–30 mL 2–3×/day",
+                      "Osmotic laxative; acidifies colon → NH₃ → NH₄⁺ (trapped)"
+                    ],
+                    [
+                      "Rifaximin",
+                      "550 mg BID"
+                    ],
+                    [
+                      "Non-absorbable antibiotic; reduces ammonia-producing bacteria",
+                      "L-ornithine L-aspartate"
+                    ],
+                    [
+                      "20 g/day IV",
+                      "Enhances urea cycle (adjunctive)"
+                    ]
+                  ]
                 }
               ]
             },
@@ -3295,100 +3202,57 @@
               "slug": "8-medication-table",
               "blocks": [
                 {
-                  "type": "p",
-                  "text": "Drug"
-                },
-                {
-                  "type": "p",
-                  "text": "Dose (daily)"
-                },
-                {
-                  "type": "p",
-                  "text": "Side Effects"
-                },
-                {
-                  "type": "p",
-                  "text": "Monitoring"
-                },
-                {
-                  "type": "p",
-                  "text": "References"
-                },
-                {
-                  "type": "p",
-                  "text": "Isoniazid (H)"
-                },
-                {
-                  "type": "p",
-                  "text": "5 mg/kg (max 300 mg)"
-                },
-                {
-                  "type": "p",
-                  "text": "Peripheral neuropathy, hepatitis"
-                },
-                {
-                  "type": "p",
-                  "text": "LFTs; give pyridoxine (B6) 25 mg/day"
-                },
-                {
-                  "type": "p",
-                  "text": "Rifampicin (R)"
-                },
-                {
-                  "type": "p",
-                  "text": "10 mg/kg (max 600 mg)"
-                },
-                {
-                  "type": "p",
-                  "text": "Hepatitis, orange secretions, drug interactions (CYP450 inducer)"
-                },
-                {
-                  "type": "p",
-                  "text": "LFTs; check drug interactions"
-                },
-                {
-                  "type": "p",
-                  "text": "Pyrazinamide (Z)"
-                },
-                {
-                  "type": "p",
-                  "text": "25 mg/kg"
-                },
-                {
-                  "type": "p",
-                  "text": "Hepatitis, hyperuricemia, arthralgia"
-                },
-                {
-                  "type": "p",
-                  "text": "Uric acid, LFTs"
-                },
-                {
-                  "type": "p",
-                  "text": "Ethambutol (E)"
-                },
-                {
-                  "type": "p",
-                  "text": "15 mg/kg"
-                },
-                {
-                  "type": "p",
-                  "text": "Optic neuritis (red-green color blindness)"
-                },
-                {
-                  "type": "p",
-                  "text": "Visual acuity, color vision"
-                },
-                {
-                  "type": "p",
-                  "text": "Streptomycin (S)"
-                },
-                {
-                  "type": "p",
-                  "text": "15 mg/kg IM"
-                },
-                {
-                  "type": "p",
-                  "text": "Ototoxicity, nephrotoxicity"
+                  "type": "table",
+                  "rows": [
+                    [
+                      "Drug",
+                      "Dose (daily)"
+                    ],
+                    [
+                      "Side Effects",
+                      "Monitoring"
+                    ],
+                    [
+                      "References",
+                      "Isoniazid (H)"
+                    ],
+                    [
+                      "5 mg/kg (max 300 mg)",
+                      "Peripheral neuropathy, hepatitis"
+                    ],
+                    [
+                      "LFTs; give pyridoxine (B6) 25 mg/day",
+                      "Rifampicin (R)"
+                    ],
+                    [
+                      "10 mg/kg (max 600 mg)",
+                      "Hepatitis, orange secretions, drug interactions (CYP450 inducer)"
+                    ],
+                    [
+                      "LFTs; check drug interactions",
+                      "Pyrazinamide (Z)"
+                    ],
+                    [
+                      "25 mg/kg",
+                      "Hepatitis, hyperuricemia, arthralgia"
+                    ],
+                    [
+                      "Uric acid, LFTs",
+                      "Ethambutol (E)"
+                    ],
+                    [
+                      "15 mg/kg",
+                      "Optic neuritis (red-green color blindness)"
+                    ],
+                    [
+                      "Visual acuity, color vision",
+                      "Streptomycin (S)"
+                    ],
+                    [
+                      "15 mg/kg IM",
+                      "Ototoxicity, nephrotoxicity"
+                    ]
+                  ]
                 },
                 {
                   "type": "p",
@@ -4710,44 +4574,29 @@
                   "text": "Management"
                 },
                 {
-                  "type": "p",
-                  "text": "References"
-                },
-                {
-                  "type": "p",
-                  "text": "Grade I (Mild)"
-                },
-                {
-                  "type": "p",
-                  "text": "Does not meet Grade II or III criteria"
-                },
-                {
-                  "type": "p",
-                  "text": "Antibiotics + elective biliary drainage"
-                },
-                {
-                  "type": "p",
-                  "text": "TG18"
-                },
-                {
-                  "type": "p",
-                  "text": "Grade II (Moderate)"
-                },
-                {
-                  "type": "p",
-                  "text": "≥2 of: WBC 12,000 or 4,000; fever ≥39°C; age ≥75; bilirubin ≥5; albumin 0.7× LLN"
-                },
-                {
-                  "type": "p",
-                  "text": "Antibiotics + early biliary drainage (within 24–48h)"
-                },
-                {
-                  "type": "p",
-                  "text": "Grade III (Severe)"
-                },
-                {
-                  "type": "p",
-                  "text": "Organ dysfunction: cardiovascular (hypotension requiring vasopressors), neurological (altered consciousness), respiratory (PaO₂/FiO₂ 300), renal (Cr 2), hepatic (INR 1.5), hematological (platelets 100,000)"
+                  "type": "table",
+                  "rows": [
+                    [
+                      "References",
+                      "Grade I (Mild)"
+                    ],
+                    [
+                      "Does not meet Grade II or III criteria",
+                      "Antibiotics + elective biliary drainage"
+                    ],
+                    [
+                      "TG18",
+                      "Grade II (Moderate)"
+                    ],
+                    [
+                      "≥2 of: WBC 12,000 or 4,000; fever ≥39°C; age ≥75; bilirubin ≥5; albumin 0.7× LLN",
+                      "Antibiotics + early biliary drainage (within 24–48h)"
+                    ],
+                    [
+                      "Grade III (Severe)",
+                      "Organ dysfunction: cardiovascular (hypotension requiring vasopressors), neurological (altered consciousness), respiratory (PaO₂/FiO₂ 300), renal (Cr 2), hepatic (INR 1.5), hematological (platelets 100,000)"
+                    ]
+                  ]
                 },
                 {
                   "type": "p",
@@ -5154,44 +5003,29 @@
                   "text": "Management"
                 },
                 {
-                  "type": "p",
-                  "text": "References"
-                },
-                {
-                  "type": "p",
-                  "text": "Grade I (Mild)"
-                },
-                {
-                  "type": "p",
-                  "text": "No organ dysfunction, no severe local inflammation"
-                },
-                {
-                  "type": "p",
-                  "text": "Early laparoscopic cholecystectomy (within 72 hours)"
-                },
-                {
-                  "type": "p",
-                  "text": "TG18"
-                },
-                {
-                  "type": "p",
-                  "text": "Grade II (Moderate)"
-                },
-                {
-                  "type": "p",
-                  "text": "WBC 18,000, palpable mass, duration 72 hours, marked local inflammation (gangrenous, emphysematous, pericholecystic abscess, biliary peritonitis)"
-                },
-                {
-                  "type": "p",
-                  "text": "Early cholecystectomy if experienced surgeon; otherwise percutaneous cholecystostomy"
-                },
-                {
-                  "type": "p",
-                  "text": "Grade III (Severe)"
-                },
-                {
-                  "type": "p",
-                  "text": "Organ dysfunction (cardiovascular, neurological, respiratory, renal, hepatic, hematological)"
+                  "type": "table",
+                  "rows": [
+                    [
+                      "References",
+                      "Grade I (Mild)"
+                    ],
+                    [
+                      "No organ dysfunction, no severe local inflammation",
+                      "Early laparoscopic cholecystectomy (within 72 hours)"
+                    ],
+                    [
+                      "TG18",
+                      "Grade II (Moderate)"
+                    ],
+                    [
+                      "WBC 18,000, palpable mass, duration 72 hours, marked local inflammation (gangrenous, emphysematous, pericholecystic abscess, biliary peritonitis)",
+                      "Early cholecystectomy if experienced surgeon; otherwise percutaneous cholecystostomy"
+                    ],
+                    [
+                      "Grade III (Severe)",
+                      "Organ dysfunction (cardiovascular, neurological, respiratory, renal, hepatic, hematological)"
+                    ]
+                  ]
                 },
                 {
                   "type": "p",
@@ -5406,44 +5240,29 @@
                   "text": "Mortality"
                 },
                 {
-                  "type": "p",
-                  "text": "References"
-                },
-                {
-                  "type": "p",
-                  "text": "Mild"
-                },
-                {
-                  "type": "p",
-                  "text": "No organ failure, no local complications"
-                },
-                {
-                  "type": "p",
-                  "text": "1%"
-                },
-                {
-                  "type": "p",
-                  "text": "Atlanta 2012"
-                },
-                {
-                  "type": "p",
-                  "text": "Moderately severe"
-                },
-                {
-                  "type": "p",
-                  "text": "Transient organ failure (48h) OR local complications"
-                },
-                {
-                  "type": "p",
-                  "text": "~5%"
-                },
-                {
-                  "type": "p",
-                  "text": "Severe"
-                },
-                {
-                  "type": "p",
-                  "text": "Persistent organ failure (48h)"
+                  "type": "table",
+                  "rows": [
+                    [
+                      "References",
+                      "Mild"
+                    ],
+                    [
+                      "No organ failure, no local complications",
+                      "1%"
+                    ],
+                    [
+                      "Atlanta 2012",
+                      "Moderately severe"
+                    ],
+                    [
+                      "Transient organ failure (48h) OR local complications",
+                      "~5%"
+                    ],
+                    [
+                      "Severe",
+                      "Persistent organ failure (48h)"
+                    ]
+                  ]
                 },
                 {
                   "type": "p",
@@ -6818,52 +6637,27 @@
               "slug": "3-severity-truelove-and-witts-criteria",
               "blocks": [
                 {
-                  "type": "p",
-                  "text": "Parameter"
-                },
-                {
-                  "type": "p",
-                  "text": "Mild"
-                },
-                {
-                  "type": "p",
-                  "text": "Severe"
-                },
-                {
-                  "type": "p",
-                  "text": "References"
-                },
-                {
-                  "type": "p",
-                  "text": "Bloody stools/day"
-                },
-                {
-                  "type": "p",
-                  "text": "90 bpm"
-                },
-                {
-                  "type": "p",
-                  "text": "Temperature"
-                },
-                {
-                  "type": "p",
-                  "text": "Normal"
-                },
-                {
-                  "type": "p",
-                  "text": ">37.8°C"
-                },
-                {
-                  "type": "p",
-                  "text": "Hemoglobin"
-                },
-                {
-                  "type": "p",
-                  "text": ">10.5 g/dL"
-                },
-                {
-                  "type": "p",
-                  "text": "30 mm/hr"
+                  "type": "table",
+                  "rows": [
+                    [
+                      "Parameter",
+                      "Mild",
+                      "Severe",
+                      "References"
+                    ],
+                    [
+                      "Bloody stools/day",
+                      "90 bpm",
+                      "Temperature",
+                      "Normal"
+                    ],
+                    [
+                      ">37.8°C",
+                      "Hemoglobin",
+                      ">10.5 g/dL",
+                      "30 mm/hr"
+                    ]
+                  ]
                 },
                 {
                   "type": "p",
@@ -15490,13 +15284,11 @@
                     ],
                     [
                       "Low risk (outpatient)",
-                      "Ciprofloxacin + amoxicillin-clavulanate PO"
+                      "Ciprofloxacin + amoxicillin-clavulanate PO",
+                      "Add vancomycin if:"
                     ],
                     [
-                      "Add vancomycin if:",
-                      "Hemodynamic instability, suspected catheter infection, skin/soft tissue infection, MRSA colonization, severe mucositis, pneumonia"
-                    ],
-                    [
+                      "Hemodynamic instability, suspected catheter infection, skin/soft tissue infection, MRSA colonization, severe mucositis, pneumonia",
                       "Add antifungal if:",
                       "Persistent fever after 4–7 days of broad-spectrum antibiotics → add empiric antifungal (caspofungin, voriconazole, or liposomal amphotericin B)"
                     ]
@@ -17587,32 +17379,41 @@
                   "rows": [
                     [
                       "Agent",
-                      "Dose",
+                      "Dose"
+                    ],
+                    [
                       "Notes",
                       "References"
                     ],
                     [
                       "beta-blocker (preferred)",
-                      "Metoprolol, bisoprolol, atenolol",
+                      "Metoprolol, bisoprolol, atenolol"
+                    ],
+                    [
                       "First-line; avoid in decompensated HF, asthma",
                       "RACE II"
                     ],
                     [
                       "Non-DHP CCB",
-                      "Diltiazem, verapamil",
-                      "Alternative; avoid in HFrEF (negative inotropy)"
+                      "Diltiazem, verapamil"
                     ],
                     [
-                      "Digoxin",
+                      "Alternative; avoid in HFrEF (negative inotropy)",
+                      "Digoxin"
+                    ],
+                    [
                       "0.125–0.25 mg/day",
                       "Add-on; for sedentary/HF patients; narrow therapeutic index"
                     ],
                     [
                       "Amiodarone",
-                      "IV or PO",
-                      "For rate control in critically ill / HF when others fail"
+                      "IV or PO"
                     ]
                   ]
+                },
+                {
+                  "type": "p",
+                  "text": "For rate control in critically ill / HF when others fail"
                 },
                 {
                   "type": "p",
@@ -18828,124 +18629,51 @@
               "slug": "2-diagnostic-criteria-ada",
               "blocks": [
                 {
-                  "type": "p",
-                  "text": "Parameter"
-                },
-                {
-                  "type": "p",
-                  "text": "Mild"
-                },
-                {
-                  "type": "p",
-                  "text": "Moderate"
-                },
-                {
-                  "type": "p",
-                  "text": "Severe"
-                },
-                {
-                  "type": "p",
-                  "text": "References"
-                },
-                {
-                  "type": "p",
-                  "text": "Glucose"
-                },
-                {
-                  "type": "p",
-                  "text": "250 mg/dL"
-                },
-                {
-                  "type": "p",
-                  "text": "250 mg/dL"
-                },
-                {
-                  "type": "p",
-                  "text": "250 mg/dL"
-                },
-                {
-                  "type": "p",
-                  "text": "ADA"
-                },
-                {
-                  "type": "p",
-                  "text": "pH"
-                },
-                {
-                  "type": "p",
-                  "text": "7.25–7.30"
-                },
-                {
-                  "type": "p",
-                  "text": "7.00–7.24"
-                },
-                {
-                  "type": "p",
-                  "text": "7.00"
-                },
-                {
-                  "type": "p",
-                  "text": "Bicarbonate"
-                },
-                {
-                  "type": "p",
-                  "text": "15–18 mEq/L"
-                },
-                {
-                  "type": "p",
-                  "text": "10–14.9 mEq/L"
-                },
-                {
-                  "type": "p",
-                  "text": "10 mEq/L"
-                },
-                {
-                  "type": "p",
-                  "text": "Anion gap"
-                },
-                {
-                  "type": "p",
-                  "text": "10"
-                },
-                {
-                  "type": "p",
-                  "text": "12"
-                },
-                {
-                  "type": "p",
-                  "text": "12"
-                },
-                {
-                  "type": "p",
-                  "text": "Ketones"
-                },
-                {
-                  "type": "p",
-                  "text": "Positive"
-                },
-                {
-                  "type": "p",
-                  "text": "Positive"
-                },
-                {
-                  "type": "p",
-                  "text": "Positive"
-                },
-                {
-                  "type": "p",
-                  "text": "Mental status"
-                },
-                {
-                  "type": "p",
-                  "text": "Alert"
-                },
-                {
-                  "type": "p",
-                  "text": "Alert/drowsy"
-                },
-                {
-                  "type": "p",
-                  "text": "Stupor/coma"
+                  "type": "table",
+                  "rows": [
+                    [
+                      "Parameter",
+                      "Mild",
+                      "Moderate",
+                      "Severe",
+                      "References"
+                    ],
+                    [
+                      "Glucose",
+                      "250 mg/dL",
+                      "250 mg/dL",
+                      "250 mg/dL",
+                      "ADA"
+                    ],
+                    [
+                      "pH",
+                      "7.25–7.30",
+                      "7.00–7.24",
+                      "7.00",
+                      "Bicarbonate"
+                    ],
+                    [
+                      "15–18 mEq/L",
+                      "10–14.9 mEq/L",
+                      "10 mEq/L",
+                      "Anion gap",
+                      "10"
+                    ],
+                    [
+                      "12",
+                      "12",
+                      "Ketones",
+                      "Positive",
+                      "Positive"
+                    ],
+                    [
+                      "Positive",
+                      "Mental status",
+                      "Alert",
+                      "Alert/drowsy",
+                      "Stupor/coma"
+                    ]
+                  ]
                 }
               ]
             },
@@ -19017,100 +18745,49 @@
                   "text": "Step 2: Potassium Replacement (BEFORE insulin if K⁺ low)"
                 },
                 {
-                  "type": "p",
-                  "text": "Serum K⁺"
-                },
-                {
-                  "type": "p",
-                  "text": "Action"
-                },
-                {
-                  "type": "p",
-                  "text": "References"
-                },
-                {
-                  "type": "p",
-                  "text": "3.3 mEq/L"
-                },
-                {
-                  "type": "p",
-                  "text": "HOLD insulin; replace K⁺ aggressively (20–40 mEq/hr) until K⁺ 3.3"
-                },
-                {
-                  "type": "p",
-                  "text": "ADA"
-                },
-                {
-                  "type": "p",
-                  "text": "3.3–5.3 mEq/L"
-                },
-                {
-                  "type": "p",
-                  "text": "Give 20–30 mEq K⁺ in each liter of IV fluid; start insulin"
-                },
-                {
-                  "type": "p",
-                  "text": "5.3 mEq/L"
-                },
-                {
-                  "type": "p",
-                  "text": "Do NOT give K⁺; recheck every 2 hours; start insulin"
-                },
-                {
-                  "type": "p",
-                  "text": "Total body K⁺ is ALWAYS depleted in DKA (even if serum K⁺ is normal/high — acidosis shifts K⁺ out of cells)"
-                },
-                {
-                  "type": "p",
-                  "text": "Insulin drives K⁺ into cells → can cause fatal hypokalemia if not replaced"
-                },
-                {
-                  "type": "p",
-                  "text": "Step 3: Insulin"
-                },
-                {
-                  "type": "p",
-                  "text": "Regular insulin IV infusion: 0.1–0.14 U/kg/hr (no bolus needed per updated ADA)"
-                },
-                {
-                  "type": "p",
-                  "text": "Alternative: 0.1 U/kg IV bolus, then 0.1 U/kg/hr infusion"
-                },
-                {
-                  "type": "p",
-                  "text": "Target glucose decrease: 50–70 mg/dL per hour"
-                },
-                {
-                  "type": "p",
-                  "text": "When glucose reaches 200 mg/dL: reduce insulin to 0.02–0.05 U/kg/hr AND add D5W; keep glucose 150–200 until DKA resolves"
-                },
-                {
-                  "type": "p",
-                  "text": "DKA resolution criteria: glucose 200 + at least 2 of: pH 7.3, bicarbonate ≥15, anion gap ≤12"
-                },
-                {
-                  "type": "p",
-                  "text": "Step 4: Bicarbonate"
-                },
-                {
-                  "type": "p",
-                  "text": "Only if pH 6.9 (severe acidosis with hemodynamic compromise)"
-                },
-                {
-                  "type": "p",
-                  "text": "100 mEq NaHCO₃ in 400 mL water + 20 mEq KCl over 2 hours"
-                },
-                {
-                  "type": "p",
-                  "text": "Routine bicarbonate is NOT recommended (may worsen intracellular acidosis, hypokalemia, paradoxical CNS acidosis)"
-                },
-                {
-                  "type": "p",
-                  "text": "Step 5: Transition to Subcutaneous Insulin"
-                },
-                {
-                  "type": "p",
-                  "text": "When DKA resolved AND patient eating → overlap SC insulin with IV insulin for 1–2 hours before stopping IV"
+                  "type": "table",
+                  "rows": [
+                    [
+                      "Serum K⁺",
+                      "Action",
+                      "References"
+                    ],
+                    [
+                      "3.3 mEq/L",
+                      "HOLD insulin; replace K⁺ aggressively (20–40 mEq/hr) until K⁺ 3.3",
+                      "ADA"
+                    ],
+                    [
+                      "3.3–5.3 mEq/L",
+                      "Give 20–30 mEq K⁺ in each liter of IV fluid; start insulin",
+                      "5.3 mEq/L"
+                    ],
+                    [
+                      "Do NOT give K⁺; recheck every 2 hours; start insulin",
+                      "Total body K⁺ is ALWAYS depleted in DKA (even if serum K⁺ is normal/high — acidosis shifts K⁺ out of cells)",
+                      "Insulin drives K⁺ into cells → can cause fatal hypokalemia if not replaced"
+                    ],
+                    [
+                      "Step 3: Insulin",
+                      "Regular insulin IV infusion: 0.1–0.14 U/kg/hr (no bolus needed per updated ADA)",
+                      "Alternative: 0.1 U/kg IV bolus, then 0.1 U/kg/hr infusion"
+                    ],
+                    [
+                      "Target glucose decrease: 50–70 mg/dL per hour",
+                      "When glucose reaches 200 mg/dL: reduce insulin to 0.02–0.05 U/kg/hr AND add D5W; keep glucose 150–200 until DKA resolves",
+                      "DKA resolution criteria: glucose 200 + at least 2 of: pH 7.3, bicarbonate ≥15, anion gap ≤12"
+                    ],
+                    [
+                      "Step 4: Bicarbonate",
+                      "Only if pH 6.9 (severe acidosis with hemodynamic compromise)",
+                      "100 mEq NaHCO₃ in 400 mL water + 20 mEq KCl over 2 hours"
+                    ],
+                    [
+                      "Routine bicarbonate is NOT recommended (may worsen intracellular acidosis, hypokalemia, paradoxical CNS acidosis)",
+                      "Step 5: Transition to Subcutaneous Insulin",
+                      "When DKA resolved AND patient eating → overlap SC insulin with IV insulin for 1–2 hours before stopping IV"
+                    ]
+                  ]
                 },
                 {
                   "type": "p",
@@ -19664,44 +19341,29 @@
                   "text": "Dehydration"
                 },
                 {
-                  "type": "p",
-                  "text": "Moderate (3–6 L)"
-                },
-                {
-                  "type": "p",
-                  "text": "Severe (8–10 L)"
-                },
-                {
-                  "type": "p",
-                  "text": "Mental status"
-                },
-                {
-                  "type": "p",
-                  "text": "Variable"
-                },
-                {
-                  "type": "p",
-                  "text": "Often altered (coma)"
-                },
-                {
-                  "type": "p",
-                  "text": "Mortality"
-                },
-                {
-                  "type": "p",
-                  "text": "1–5%"
-                },
-                {
-                  "type": "p",
-                  "text": "5–20%"
-                },
-                {
-                  "type": "p",
-                  "text": "Key treatment"
-                },
-                {
-                  "type": "p",
-                  "text": "Insulin + fluids"
+                  "type": "table",
+                  "rows": [
+                    [
+                      "Moderate (3–6 L)",
+                      "Severe (8–10 L)"
+                    ],
+                    [
+                      "Mental status",
+                      "Variable"
+                    ],
+                    [
+                      "Often altered (coma)",
+                      "Mortality"
+                    ],
+                    [
+                      "1–5%",
+                      "5–20%"
+                    ],
+                    [
+                      "Key treatment",
+                      "Insulin + fluids"
+                    ]
+                  ]
                 },
                 {
                   "type": "p",
@@ -20971,27 +20633,37 @@
                   "rows": [
                     [
                       "Treatment",
-                      "Mechanism",
-                      "Indications",
-                      "Key Points",
-                      "References"
+                      "Mechanism"
                     ],
                     [
-                      "Antithyroid drugs (ATDs)",
+                      "Indications",
+                      "Key Points"
+                    ],
+                    [
+                      "References",
+                      "Antithyroid drugs (ATDs)"
+                    ],
+                    [
                       "Block thyroid hormone synthesis",
-                      "First-line in many countries (Asia, Europe); preferred in mild disease, small goiter, pregnancy (1st trimester: PTU)",
+                      "First-line in many countries (Asia, Europe); preferred in mild disease, small goiter, pregnancy (1st trimester: PTU)"
+                    ],
+                    [
                       "Methimazole preferred (once daily, fewer side effects); PTU for 1st trimester pregnancy and thyroid storm; Side effects: agranulocytosis (0.2–0.5% — check WBC if fever/sore throat), hepatotoxicity (PTU — hepatic necrosis; methimazole — cholestatic), rash",
                       "ATA 2016"
                     ],
                     [
                       "Radioactive iodine (RAI)",
-                      "Destroys thyroid tissue",
+                      "Destroys thyroid tissue"
+                    ],
+                    [
                       "Preferred definitive therapy in US; contraindicated in pregnancy, severe ophthalmopathy",
                       "Most patients become hypothyroid → lifelong levothyroxine; may worsen Graves ophthalmopathy (give steroids if moderate-severe eye disease)"
                     ],
                     [
                       "Surgery (thyroidectomy)",
-                      "Removes thyroid",
+                      "Removes thyroid"
+                    ],
+                    [
                       "Large goiter, suspicious nodule, severe ophthalmopathy, contraindication to ATD/RAI, patient preference",
                       "Risks: recurrent laryngeal nerve injury (hoarseness), hypoparathyroidism (hypocalcemia), bleeding/hematoma; must be euthyroid before surgery (ATD + beta-blocker pre-op)"
                     ]
@@ -21101,19 +20773,17 @@
                     [
                       "Feature",
                       "Type 1",
-                      "Type 2"
+                      "Type 2",
+                      "Mechanism"
                     ],
                     [
-                      "Mechanism",
                       "Iodine-induced (Jod-Basedow)",
-                      "Destructive thyroiditis"
-                    ],
-                    [
+                      "Destructive thyroiditis",
                       "Underlying thyroid",
-                      "Yes (goiter, Graves, MNG)",
-                      "No"
+                      "Yes (goiter, Graves, MNG)"
                     ],
                     [
+                      "No",
                       "RAIU",
                       "Normal/increased",
                       "Decreased"
@@ -21121,14 +20791,18 @@
                     [
                       "Treatment",
                       "ATDs (methimazole)",
-                      "Steroids (prednisone)"
-                    ],
-                    [
-                      "Doppler US",
-                      "Increased vascularity",
-                      "Decreased vascularity"
+                      "Steroids (prednisone)",
+                      "Doppler US"
                     ]
                   ]
+                },
+                {
+                  "type": "p",
+                  "text": "Increased vascularity"
+                },
+                {
+                  "type": "p",
+                  "text": "Decreased vascularity"
                 },
                 {
                   "type": "bullet",
@@ -21363,49 +21037,44 @@
                     ],
                     [
                       "2–10 large joints",
-                      "1"
+                      "1",
+                      "1–3 small joints"
                     ],
                     [
-                      "1–3 small joints",
-                      "2"
-                    ],
-                    [
+                      "2",
                       "4–10 small joints",
                       "3"
                     ],
                     [
                       "10 joints (≥1 small)",
-                      "5"
+                      "5",
+                      "Serology: negative RF AND negative anti-CCP"
                     ],
                     [
-                      "Serology: negative RF AND negative anti-CCP",
-                      "0"
-                    ],
-                    [
+                      "0",
                       "Low-positive RF OR low-positive anti-CCP",
                       "2"
                     ],
                     [
                       "High-positive RF OR high-positive anti-CCP",
-                      "3"
+                      "3",
+                      "Acute phase reactants: normal ESR AND CRP"
                     ],
                     [
-                      "Acute phase reactants: normal ESR AND CRP",
-                      "0"
-                    ],
-                    [
+                      "0",
                       "Abnormal ESR OR CRP",
                       "1"
                     ],
                     [
                       "Duration: 6 weeks",
-                      "0"
-                    ],
-                    [
-                      "≥6 weeks",
-                      "1"
+                      "0",
+                      "≥6 weeks"
                     ]
                   ]
+                },
+                {
+                  "type": "p",
+                  "text": "1"
                 }
               ]
             },
@@ -22187,84 +21856,49 @@
                   "text": "activity"
                 },
                 {
-                  "type": "p",
-                  "text": "Anti-histone ~95% in Moderate Drug-induced"
-                },
-                {
-                  "type": "p",
-                  "text": "drug- lupus"
-                },
-                {
-                  "type": "p",
-                  "text": "induced (hydralazine,"
-                },
-                {
-                  "type": "p",
-                  "text": "lupus procainamide,"
-                },
-                {
-                  "type": "p",
-                  "text": "isoniazid,"
-                },
-                {
-                  "type": "p",
-                  "text": "minocycline)"
-                },
-                {
-                  "type": "p",
-                  "text": "Anti-Ro (SSA) Variable Moderate Neonatal lupus"
-                },
-                {
-                  "type": "p",
-                  "text": "(congenital heart"
-                },
-                {
-                  "type": "p",
-                  "text": "block); Sjögren"
-                },
-                {
-                  "type": "p",
-                  "text": "overlap;"
-                },
-                {
-                  "type": "p",
-                  "text": "subacute"
-                },
-                {
-                  "type": "p",
-                  "text": "cutaneous lupus;"
-                },
-                {
-                  "type": "p",
-                  "text": "photosensitivity"
-                },
-                {
-                  "type": "p",
-                  "text": "Anti-La (SSB) Variable Moderate Sjögren overlap;"
-                },
-                {
-                  "type": "p",
-                  "text": "protective"
-                },
-                {
-                  "type": "p",
-                  "text": "against nephritis"
-                },
-                {
-                  "type": "p",
-                  "text": "Antiphospholipid ~30–40% Moderate Thrombosis,"
-                },
-                {
-                  "type": "p",
-                  "text": "(aCL, anti- recurrent"
-                },
-                {
-                  "type": "p",
-                  "text": "β2GP1, lupus pregnancy loss"
-                },
-                {
-                  "type": "p",
-                  "text": "anticoagulant) (antiphospholipid"
+                  "type": "table",
+                  "rows": [
+                    [
+                      "Anti-histone ~95% in Moderate Drug-induced",
+                      "drug- lupus"
+                    ],
+                    [
+                      "induced (hydralazine,",
+                      "lupus procainamide,"
+                    ],
+                    [
+                      "isoniazid,",
+                      "minocycline)"
+                    ],
+                    [
+                      "Anti-Ro (SSA) Variable Moderate Neonatal lupus",
+                      "(congenital heart"
+                    ],
+                    [
+                      "block); Sjögren",
+                      "overlap;"
+                    ],
+                    [
+                      "subacute",
+                      "cutaneous lupus;"
+                    ],
+                    [
+                      "photosensitivity",
+                      "Anti-La (SSB) Variable Moderate Sjögren overlap;"
+                    ],
+                    [
+                      "protective",
+                      "against nephritis"
+                    ],
+                    [
+                      "Antiphospholipid ~30–40% Moderate Thrombosis,",
+                      "(aCL, anti- recurrent"
+                    ],
+                    [
+                      "β2GP1, lupus pregnancy loss",
+                      "anticoagulant) (antiphospholipid"
+                    ]
+                  ]
                 },
                 {
                   "type": "p",
@@ -22444,60 +22078,37 @@
               "slug": "7-stepwise-management-of-sle-by-severity",
               "blocks": [
                 {
-                  "type": "p",
-                  "text": "Severity Manifestations Treatment References"
-                },
-                {
-                  "type": "p",
-                  "text": "Mild Skin, arthritis, Hydroxychloroquine (ALL EULAR"
-                },
-                {
-                  "type": "p",
-                  "text": "fatigue SLE patients) + NSAIDs 2023"
-                },
-                {
-                  "type": "p",
-                  "text": "± low-dose steroids"
-                },
-                {
-                  "type": "p",
-                  "text": "Moderate Serositis, HCQ + moderate-dose"
-                },
-                {
-                  "type": "p",
-                  "text": "hematologic, steroids + azathioprine or"
-                },
-                {
-                  "type": "p",
-                  "text": "refractory skin/ MTX"
-                },
-                {
-                  "type": "p",
-                  "text": "joints"
-                },
-                {
-                  "type": "p",
-                  "text": "Severe Nephritis (III/IV/V), HCQ + high-dose steroids"
-                },
-                {
-                  "type": "p",
-                  "text": "CNS lupus, severe + MMF or"
-                },
-                {
-                  "type": "p",
-                  "text": "cytopenias, DAH cyclophosphamide ±"
-                },
-                {
-                  "type": "p",
-                  "text": "belimumab/voclosporin"
-                },
-                {
-                  "type": "p",
-                  "text": "Refractory Failure of standard Rituximab (off-label),"
-                },
-                {
-                  "type": "p",
-                  "text": "therapy plasma exchange, IVIG"
+                  "type": "table",
+                  "rows": [
+                    [
+                      "Severity Manifestations Treatment References",
+                      "Mild Skin, arthritis, Hydroxychloroquine (ALL EULAR"
+                    ],
+                    [
+                      "fatigue SLE patients) + NSAIDs 2023",
+                      "± low-dose steroids"
+                    ],
+                    [
+                      "Moderate Serositis, HCQ + moderate-dose",
+                      "hematologic, steroids + azathioprine or"
+                    ],
+                    [
+                      "refractory skin/ MTX",
+                      "joints"
+                    ],
+                    [
+                      "Severe Nephritis (III/IV/V), HCQ + high-dose steroids",
+                      "CNS lupus, severe + MMF or"
+                    ],
+                    [
+                      "cytopenias, DAH cyclophosphamide ±",
+                      "belimumab/voclosporin"
+                    ],
+                    [
+                      "Refractory Failure of standard Rituximab (off-label),",
+                      "therapy plasma exchange, IVIG"
+                    ]
+                  ]
                 },
                 {
                   "type": "p",
@@ -23448,68 +23059,41 @@
                   "text": "methimazole)"
                 },
                 {
-                  "type": "p",
-                  "text": "Type Mechanism Timing Examples References"
-                },
-                {
-                  "type": "p",
-                  "text": "Type III Antigen- 1–3 Serum sickness"
-                },
-                {
-                  "type": "p",
-                  "text": "(Immune antibody weeks (antithymocyte"
-                },
-                {
-                  "type": "p",
-                  "text": "Complex) complex globulin,"
-                },
-                {
-                  "type": "p",
-                  "text": "deposition rituximab), serum"
-                },
-                {
-                  "type": "p",
-                  "text": "sickness-like"
-                },
-                {
-                  "type": "p",
-                  "text": "reaction (cefaclor,"
-                },
-                {
-                  "type": "p",
-                  "text": "TMP-SMX),"
-                },
-                {
-                  "type": "p",
-                  "text": "vasculitis"
-                },
-                {
-                  "type": "p",
-                  "text": "Type IV T-cell 48–72 Contact"
-                },
-                {
-                  "type": "p",
-                  "text": "(Delayed/ mediated hours dermatitis, SJS/"
-                },
-                {
-                  "type": "p",
-                  "text": "Cell- to TEN, DRESS,"
-                },
-                {
-                  "type": "p",
-                  "text": "Mediated) weeks maculopapular"
-                },
-                {
-                  "type": "p",
-                  "text": "drug eruption,"
-                },
-                {
-                  "type": "p",
-                  "text": "tuberculin skin"
-                },
-                {
-                  "type": "p",
-                  "text": "test"
+                  "type": "table",
+                  "rows": [
+                    [
+                      "Type Mechanism Timing Examples References",
+                      "Type III Antigen- 1–3 Serum sickness"
+                    ],
+                    [
+                      "(Immune antibody weeks (antithymocyte",
+                      "Complex) complex globulin,"
+                    ],
+                    [
+                      "deposition rituximab), serum",
+                      "sickness-like"
+                    ],
+                    [
+                      "reaction (cefaclor,",
+                      "TMP-SMX),"
+                    ],
+                    [
+                      "vasculitis",
+                      "Type IV T-cell 48–72 Contact"
+                    ],
+                    [
+                      "(Delayed/ mediated hours dermatitis, SJS/",
+                      "Cell- to TEN, DRESS,"
+                    ],
+                    [
+                      "Mediated) weeks maculopapular",
+                      "drug eruption,"
+                    ],
+                    [
+                      "tuberculin skin",
+                      "test"
+                    ]
+                  ]
                 }
               ]
             },
@@ -25476,13 +25060,14 @@
                     ],
                     [
                       "Dengue WITH warning signs",
-                      "Above + any: abdominal pain/tenderness, persistent vomiting, clinical fluid accumulation (ascites, pleural effusion), mucosal bleeding, lethargy/restlessness, hepatomegaly ≥2 cm, rising HCT with rapid platelet drop"
-                    ],
-                    [
-                      "Severe dengue",
-                      "Any of: severe plasma leakage (shock — DSS, respiratory distress from fluid accumulation), severe bleeding (GI), severe organ impairment (liver: AST/ALT ≥1000, CNS: encephalopathy, heart)"
+                      "Above + any: abdominal pain/tenderness, persistent vomiting, clinical fluid accumulation (ascites, pleural effusion), mucosal bleeding, lethargy/restlessness, hepatomegaly ≥2 cm, rising HCT with rapid platelet drop",
+                      "Severe dengue"
                     ]
                   ]
+                },
+                {
+                  "type": "p",
+                  "text": "Any of: severe plasma leakage (shock — DSS, respiratory distress from fluid accumulation), severe bleeding (GI), severe organ impairment (liver: AST/ALT ≥1000, CNS: encephalopathy, heart)"
                 }
               ]
             },
@@ -28769,83 +28354,101 @@
               "rows": [
                 [
                   "Drug",
-                  "Key Contraindication / Interaction",
+                  "Key Contraindication / Interaction"
+                ],
+                [
                   "Why",
                   "References"
                 ],
                 [
                   "Metformin",
-                  "eGFR 30; hold before contrast",
+                  "eGFR 30; hold before contrast"
+                ],
+                [
                   "Lactic acidosis risk",
                   "ADA"
                 ],
                 [
                   "ACEi/ARB",
-                  "Bilateral renal artery stenosis; pregnancy; K 5.5",
-                  "Hyperkalemia, AKI, teratogenicity"
+                  "Bilateral renal artery stenosis; pregnancy; K 5.5"
                 ],
                 [
-                  "Spironolactone",
+                  "Hyperkalemia, AKI, teratogenicity",
+                  "Spironolactone"
+                ],
+                [
                   "K 5.0; eGFR 30 (relative)",
                   "Hyperkalemia"
                 ],
                 [
                   "NSAIDs",
-                  "CKD, heart failure, active GI bleed, 3rd trimester pregnancy",
-                  "AKI, fluid retention, GI bleed, premature ductus closure"
+                  "CKD, heart failure, active GI bleed, 3rd trimester pregnancy"
                 ],
                 [
-                  "Warfarin",
+                  "AKI, fluid retention, GI bleed, premature ductus closure",
+                  "Warfarin"
+                ],
+                [
                   "Pregnancy (teratogenic — 1st trimester)",
                   "Warfarin embryopathy"
                 ],
                 [
                   "Methotrexate",
-                  "Pregnancy; severe renal/hepatic impairment",
-                  "Teratogenic; accumulates"
+                  "Pregnancy; severe renal/hepatic impairment"
                 ],
                 [
-                  "Allopurinol",
+                  "Teratogenic; accumulates",
+                  "Allopurinol"
+                ],
+                [
                   "Check HLA-B*5801 in at-risk populations",
                   "SJS/TEN risk"
                 ],
                 [
                   "Carbamazepine",
-                  "Check HLA-B*1502 in SE Asian populations",
-                  "SJS/TEN risk"
+                  "Check HLA-B*1502 in SE Asian populations"
                 ],
                 [
-                  "Abacavir",
+                  "SJS/TEN risk",
+                  "Abacavir"
+                ],
+                [
                   "Check HLA-B*5701",
                   "Fatal hypersensitivity"
                 ],
                 [
                   "Primaquine",
-                  "G6PD deficiency; pregnancy",
-                  "Hemolytic anemia"
+                  "G6PD deficiency; pregnancy"
                 ],
                 [
-                  "Nitrates",
+                  "Hemolytic anemia",
+                  "Nitrates"
+                ],
+                [
                   "PDE5 inhibitors (sildenafil); RV infarct",
                   "Severe hypotension"
                 ],
                 [
                   "beta-blockers",
-                  "Decompensated HF (acute); severe bradycardia; cocaine toxicity",
-                  "Worsens failure; unopposed alpha-stimulation (cocaine)"
+                  "Decompensated HF (acute); severe bradycardia; cocaine toxicity"
                 ],
                 [
-                  "Rifampin",
+                  "Worsens failure; unopposed alpha-stimulation (cocaine)",
+                  "Rifampin"
+                ],
+                [
                   "Many drug interactions (potent CYP450 inducer)",
                   "Reduces levels of warfarin, OCP, protease inhibitors, steroids"
                 ],
                 [
                   "Fluoroquinolones",
-                  "Myasthenia gravis; QTc prolongation; tendon disorders",
-                  "Worsens MG; arrhythmia; tendon rupture"
+                  "Myasthenia gravis; QTc prolongation; tendon disorders"
                 ],
                 [
-                  "Heparin",
+                  "Worsens MG; arrhythmia; tendon rupture",
+                  "Heparin"
+                ],
+                [
                   "HIT (heparin-induced thrombocytopenia)",
                   "Paradoxical thrombosis"
                 ]

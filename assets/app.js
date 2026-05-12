@@ -282,7 +282,7 @@ function renderNav(){
 }
 function renderTable(rows){
   const htmlRows = normalizeBlocks(rows).map((row, i) => `<tr>${normalizeBlocks(row).map(cell => i===0 ? `<th>${esc(safeText(cell, ''))}</th>` : `<td>${esc(safeText(cell, ''))}</td>`).join('')}</tr>`).join('');
-  return `<table class="doc-table">${htmlRows}</table>`;
+  return `<div class="doc-table-wrap"><table class="doc-table">${htmlRows}</table></div>`;
 }
 function renderBlocks(blocks){
   let html='';
