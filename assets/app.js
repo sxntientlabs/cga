@@ -32,7 +32,14 @@ const els = {
 };
 
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
-function safeText(v, fallback=''){ return String(v ?? fallback); }
+function safeText(v, fallback=''){
+  const text = String(v ?? fallback ?? '');
+  const cleaned = text
+    .replace(/\bundefined(?:\s+(?:section|blocks?))?\b/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return cleaned || String(fallback || '');
+}
 function norm(s){return String(s).toLowerCase().replace(/[^a-z0-9\s]+/g,' ').replace(/\s+/g,' ').trim();}
 function topicKey(partSlug, topicSlug){return `${partSlug}/${topicSlug}`;}
 function setStorage(){
@@ -90,6 +97,10 @@ function setFocus(){
 }
 function setSidebar(){
   document.body.classList.toggle('sidebar-open', !!state.sidebarOpen);
+  if (els.nav?.closest('.sidebar')) {
+    els.nav.closest('.sidebar').classList.toggle('is-open', !!state.sidebarOpen);
+  }
+  if (els.sidebarBackdrop) els.sidebarBackdrop.classList.toggle('is-open', !!state.sidebarOpen);
 }
 function goHomeMode(mode){
   state.mode = mode;
@@ -212,7 +223,7 @@ function renderNav(){
   els.nav.innerHTML = moduleHtml + (resourceHtml ? `<div class="section-title" style="margin:14px 0 8px"><h3>Resources</h3><span>references & review</span></div>${resourceHtml}` : '');
 }
 function renderTable(rows){
-  const htmlRows = rows.map((row, i) => `<tr>${row.map(cell => i===0 ? `<th>${esc(cell)}</th>` : `<td>${esc(cell)}</td>`).join('')}</tr>`).join('');
+  const htmlRows = normalizeBlocks(rows).map((row, i) => `<tr>${normalizeBlocks(row).map(cell => i===0 ? `<th>${esc(safeText(cell, ''))}</th>` : `<td>${esc(safeText(cell, ''))}</td>`).join('')}</tr>`).join('');
   return `<table class="doc-table">${htmlRows}</table>`;
 }
 function renderBlocks(blocks){
@@ -228,7 +239,7 @@ function renderBlocks(blocks){
     if (b.type === 'bullet') { if (mode && mode !== 'bullet') flush(); mode = 'bullet'; items.push(b.text); continue; }
     if (b.type === 'num') { if (mode && mode !== 'num') flush(); mode = 'num'; items.push(b.text); continue; }
     flush();
-    if (b.type === 'p') html += `<p>${esc(b.text)}</p>`;
+    if (b.type === 'p') html += `<p>${esc(safeText(b.text, ''))}</p>`;
     else if (b.type === 'table') html += renderTable(b.rows);
   }
   flush();
@@ -269,7 +280,7 @@ function renderHome(){
       <p>${esc(safeText(first.display, first.title || 'Topic'))} → ${esc(safeText(last.display, last.title || 'Topic'))}</p>
     </div>`;
   }).join('');
-  const next = topics.find(t => !state.done.has(topicKey(t.partSlug, t.slug))) || topics[0];
+  const next = topics.find(t => !state.done.has(topicKey(t.partSlug, t.slug))) || topics[0] || {slug:'home'};
   const done = topicDoneCount();
   const searchBlock = state.search.trim().length >= 2 ? renderSearchResults(state.search.trim()) : '';
   els.crumbs.textContent = 'Home';
@@ -304,57 +315,57 @@ function renderHome(){
     <div class="module-grid">${modules}</div>
     <div class="section-title"><h3>Quick access</h3><span>recent · high-yield</span></div>
     <div class="card pad">
-      <div class="toolbar">${recent.map(t => `<a class="badge" href="#topic/${t.slug}">${esc(t.display)}</a>`).join('')}</div>
+      <div class="toolbar">${recent.map(t => `<a class="badge" href="#topic/${t.slug}">${esc(safeText(t.display, 'Topic'))}</a>`).join('')}</div>
     </div>
   `;
   const resetBtn = document.getElementById('resetDone');
   if (resetBtn) resetBtn.onclick = () => { state.done.clear(); setStorage(); updateStats(); render(); };
-  document.querySelectorAll('[data-href]').forEach(el => el.onclick = () => location.hash = el.dataset.href);
+  document.querySelectorAll('[data-href]').forEach(el => el.onclick = () => location.hash = el.dataset.href || '#home');
 }
 function renderPart(slug){
   const part = allModules().find(p => p.slug === slug);
   if (!part) return renderNotFound();
-  els.crumbs.textContent = `Home / ${part.display}`;
-  els.pageTitle.textContent = part.display;
-  els.pageSubtitle.textContent = `${part.topics.length} topic · curated learning path`;
+  els.crumbs.textContent = `Home / ${safeText(part.display, 'Module')}`;
+  els.pageTitle.textContent = safeText(part.display, 'Module');
+  els.pageSubtitle.textContent = `${part.topics.length} topic${part.topics.length === 1 ? '' : 's'} · curated learning path`;
   els.content.innerHTML = `
     <div class="kpi-row">
       <div class="kpi"><span>Topics</span><strong>${part.topics.length}</strong></div>
       <div class="kpi"><span>Completed</span><strong>${part.topics.filter(t => state.done.has(topicKey(part.slug, t.slug))).length}</strong></div>
-      <div class="kpi"><span>First topic</span><strong style="font-size:1rem">${esc(part.topics[0]?.display || '-')}</strong></div>
+      <div class="kpi"><span>First topic</span><strong style="font-size:1rem">${esc(safeText(part.topics[0]?.display, '-'))}</strong></div>
     </div>
     <div class="section-title"><h3>Topics in this module</h3><span>urut sesuai materi</span></div>
     <div class="module-grid">
       ${part.topics.map(t => `
         <div class="module-card" data-href="#topic/${t.slug}">
-          <span class="badge">${t.sectionCount} sections</span>
+          <span class="badge">${Number.isFinite(t.sectionCount) ? t.sectionCount : 0} sections</span>
           <span class="card-arrow">↗</span>
-          <h3>${esc(t.display)}</h3>
-          <p>${esc((t.sections[0]?.title || 'Core clinical note'))}</p>
+          <h3>${esc(safeText(t.display, 'Untitled topic'))}</h3>
+          <p>${esc(safeText(t.sections[0]?.title, 'Core clinical note'))}</p>
         </div>`).join('')}
     </div>`;
-  document.querySelectorAll('[data-href]').forEach(el => el.onclick = () => location.hash = el.dataset.href);
+  document.querySelectorAll('[data-href]').forEach(el => el.onclick = () => location.hash = el.dataset.href || '#home');
 }
 function renderResource(slug){
   const page = allResources().find(p => p.slug === slug);
   if (!page) return renderNotFound();
   if (page.slug === 'cga-brillian') return renderCgaBrillianResource(page);
-  els.crumbs.textContent = `Home / Resources / ${page.display}`;
-  els.pageTitle.textContent = page.display;
+  els.crumbs.textContent = `Home / Resources / ${safeText(page.display, 'Resource')}`;
+  els.pageTitle.textContent = safeText(page.display, 'Resource');
   const pageSections = normalizeSections(page.sections);
-  els.pageSubtitle.textContent = `${pageSections.length || 1} sections · reference page`;
+  els.pageSubtitle.textContent = `${pageSections.length || 1} section${(pageSections.length || 1) === 1 ? '' : 's'} · reference page`;
   const intro = page.intro?.length ? `<div class="section-card" id="sec-overview"><h3>Overview</h3>${renderBlocks(page.intro)}</div>` : '';
-  const sections = pageSections.map(sec => `<div class="section-card" id="sec-${sec.slug}"><h3>${esc(sec.display || sec.title || 'Section')}</h3>${renderBlocks(sec.blocks)}</div>`).join('');
+  const sections = pageSections.map(sec => `<div class="section-card" id="sec-${sec.slug}"><h3>${esc(safeText(sec.display || sec.title, 'Section'))}</h3>${renderBlocks(sec.blocks)}</div>`).join('');
   const tocSections = pageSections.length ? pageSections : [{slug:'overview', display:'Overview', blocks: page.intro || []}];
-  const toc = tocSections.map(sec => `<a href="#resource/${page.slug}#sec-${sec.slug}">${esc(sec.display)}</a>`).join('');
+  const toc = tocSections.map(sec => `<a href="#resource/${page.slug}#sec-${sec.slug}">${esc(safeText(sec.display, 'Section'))}</a>`).join('');
   els.content.innerHTML = `
     <div class="view-grid">
       <article class="card article">
         <div class="article-head">
           <div>
             <span class="badge">Resource</span>
-            <h2>${esc(page.display)}</h2>
-            <p>${pageSections.length || 1} sections</p>
+            <h2>${esc(safeText(page.display, 'Resource'))}</h2>
+            <p>${pageSections.length || 1} section${(pageSections.length || 1) === 1 ? '' : 's'}</p>
           </div>
         </div>
         ${intro}
@@ -372,8 +383,8 @@ function renderResource(slug){
   }
 }
 function renderCgaBrillianResource(page){
-  els.crumbs.textContent = `Home / Resources / ${page.display}`;
-  els.pageTitle.textContent = page.display;
+  els.crumbs.textContent = `Home / Resources / ${safeText(page.display, 'CGA Brillian')}`;
+  els.pageTitle.textContent = safeText(page.display, 'CGA Brillian');
   els.pageSubtitle.textContent = 'Integrated CGA assessment inside LMS Wiki';
   const src = './cga-brillian/index.html';
   els.content.innerHTML = `
@@ -383,7 +394,7 @@ function renderCgaBrillianResource(page){
           <div>
             <span class="badge">Interactive feature</span>
             <h2 style="margin-top:10px">CGA Brillian</h2>
-            <p>${esc(page.intro?.[0]?.text || 'Comprehensive Geriatric Assessment terintegrasi langsung ke LMS Wiki.')}</p>
+            <p>${esc(safeText(page.intro?.[0]?.text, 'Comprehensive Geriatric Assessment terintegrasi langsung ke LMS Wiki.'))}</p>
           </div>
           <div class="toolbar" style="margin:0;justify-content:flex-end">
             <a class="btn primary" href="${src}" target="_blank" rel="noreferrer">Open full page</a>
@@ -531,9 +542,9 @@ function renderReview(){
       <div class="kpi"><span>Bookmarks</span><strong>${state.bookmarks.size}</strong></div>
     </div>
     <div class="section-title"><h3>Done</h3><span>terakhir dipelajari</span></div>
-    <div class="toolbar">${doneTopics.map(t => `<a class="badge" href="#topic/${t.slug}">${esc(t.display)}</a>`).join('') || '<div class="empty">Belum ada yang ditandai selesai.</div>'}</div>
+    <div class="toolbar">${doneTopics.map(t => `<a class="badge" href="#topic/${t.slug}">${esc(safeText(t.display, 'Topic'))}</a>`).join('') || '<div class="empty">Belum ada yang ditandai selesai.</div>'}</div>
     <div class="section-title"><h3>Need review</h3><span>lanjutkan belajar</span></div>
-    <div class="toolbar">${pendingTopics.map(t => `<a class="badge" href="#topic/${t.slug}">${esc(t.display)}</a>`).join('') || '<div class="empty">Semua topik sudah selesai 🎉</div>'}</div>
+    <div class="toolbar">${pendingTopics.map(t => `<a class="badge" href="#topic/${t.slug}">${esc(safeText(t.display, 'Topic'))}</a>`).join('') || '<div class="empty">Semua topik sudah selesai 🎉</div>'}</div>
   `;
 }
 function renderStudy(){
@@ -596,11 +607,11 @@ function renderHomeBody(){
     return `<div class="module-card" data-href="#part/${part.slug}">
       <span class="badge">${part.topics.length} topics</span>
       <span class="card-arrow">↗</span>
-      <h3>${esc(part.display)}</h3>
+      <h3>${esc(safeText(part.display, 'Module'))}</h3>
       <p>${esc(safeText(first.display, first.title || 'Topic'))} → ${esc(safeText(last.display, last.title || 'Topic'))}</p>
     </div>`;
   }).join('');
-  const next = topics.find(t => !state.done.has(topicKey(t.partSlug, t.slug))) || topics[0];
+  const next = topics.find(t => !state.done.has(topicKey(t.partSlug, t.slug))) || topics[0] || {slug:'home'};
   const done = topicDoneCount();
   const resources = allResources();
   const resourceCards = resources.map(page => `
@@ -641,12 +652,12 @@ function renderHomeBody(){
     <div class="module-grid">${resourceCards}</div>
     <div class="section-title"><h3>Quick access</h3><span>recent / high-yield</span></div>
     <div class="card pad">
-      <div class="toolbar">${recent.map(t => `<a class="badge" href="#topic/${t.slug}">${esc(t.display)}</a>`).join('')}</div>
+      <div class="toolbar">${recent.map(t => `<a class="badge" href="#topic/${t.slug}">${esc(safeText(t.display, 'Topic'))}</a>`).join('')}</div>
     </div>`;
 }
 function bindHomeCards(){
   document.querySelectorAll('[data-href]').forEach(el => el.onclick = () => {
-    location.hash = el.dataset.href;
+    location.hash = el.dataset.href || '#home';
     if (window.matchMedia('(max-width: 720px)').matches) { state.sidebarOpen = false; setStorage(); setSidebar(); }
   });
   const resetBtn = document.getElementById('resetDone');
