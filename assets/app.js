@@ -282,41 +282,28 @@ function renderNav(){
   }).join('');
   els.nav.innerHTML = moduleHtml + (resourceHtml ? `<div class="section-title" style="margin:14px 0 8px"><h3>Resources</h3><span>references & review</span></div>${resourceHtml}` : '');
 }
-function cleanSectionTitle(title){ return safeText(title, 'Section').replace(/^\s*\d+\.\s*/, ''); }
+function cleanSectionTitle(title){ return safeText(title, 'Section'); }
 function renderTable(rows){
   const htmlRows = normalizeBlocks(rows).map((row, i) => `<tr>${normalizeBlocks(row).map(cell => i===0 ? `<th>${esc(safeText(cell, ''))}</th>` : `<td>${esc(safeText(cell, ''))}</td>`).join('')}</tr>`).join('');
   return `<div class="doc-table-wrap"><table class="doc-table">${htmlRows}</table></div>`;
 }
 function renderBlocks(blocks){
   let html='';
-  let mode=null; let items=[]; let paras=[];
+  let mode=null; let items=[];
   const flushList=()=>{
     if (!items.length) return;
     const tag = mode === 'num' ? 'ol' : 'ul';
     const clean = items.map(x => safeText(x, '')).filter(Boolean);
-    if (!clean.length) { mode=null; items=[]; return; }
-    html += `<${tag}>${clean.map(x => `<li>${esc(x)}</li>`).join('')}</${tag}>`;
+    if (clean.length) html += `<${tag}>${clean.map(x => `<li>${esc(x)}</li>`).join('')}</${tag}>`;
     mode=null; items=[];
   };
-  const flushParas=()=>{
-    const clean = paras.map(x => safeText(x, '')).filter(Boolean);
-    paras=[];
-    if (!clean.length) return;
-    if (clean.length === 1) { html += `<p>${esc(clean[0])}</p>`; return; }
-    const intro = clean.length >= 3 && /[:：]$/.test(clean[1]) ? `${clean[0]} ${clean[1]}` : '';
-    const list = intro ? clean.slice(2) : clean;
-    if (intro) html += `<p>${esc(intro)}</p>`;
-    if (list.length) html += `<ul>${list.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`;
-  };
   for (const b of normalizeBlocks(blocks)) {
-    if (b.type === 'p') { paras.push(b.text); continue; }
-    flushParas();
     if (b.type === 'bullet') { if (mode && mode !== 'bullet') flushList(); mode = 'bullet'; items.push(b.text); continue; }
     if (b.type === 'num') { if (mode && mode !== 'num') flushList(); mode = 'num'; items.push(b.text); continue; }
     flushList();
-    if (b.type === 'table') html += renderTable(b.rows);
+    if (b.type === 'p') { const text = safeText(b.text, ''); if (text) html += `<p>${esc(text)}</p>`; }
+    else if (b.type === 'table') html += renderTable(b.rows);
   }
-  flushParas();
   flushList();
   return html;
 }
