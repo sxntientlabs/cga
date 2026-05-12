@@ -83,6 +83,7 @@ function normalizeData(data){
 function allTopics(){ return allModules().flatMap(p => normalizeSections(p.topics).map(t => ({...t, part: p}))); }
 function allPages(){ return [...allModules().map(p => ({kind:'module', ...p})), ...allResources().map(r => ({kind:'resource', ...r}))]; }
 function topicDoneCount(){ return allTopics().filter(t => state.done.has(topicKey(t.partSlug, t.slug))).length; }
+function totalTopicSections(){ return allTopics().reduce((n,t) => n + normalizeSections(t.sections).length, 0); }
 function updateStats(){
   const total = allTopics().length || 1;
   const done = topicDoneCount();
@@ -520,7 +521,7 @@ function renderStudyTools(topic){
           ${chosen ? `<div class="quiz-explanation"><strong>Pembahasan:</strong> ${esc(currentQuiz.explanation)}${chosenOption && chosen !== currentQuiz.answerId ? `<br><strong>Yang kamu pilih:</strong> ${esc(chosenOption.text)}` : ''}</div>` : ''}
           <div class="toolbar" style="margin-top:14px">
             <button class="btn" id="quizPrev" ${quizState.index === 0 ? 'disabled' : ''}>Prev</button>
-            <button class="btn primary" id="quizNext" ${(!chosen && answeredCount < quiz.length) ? 'disabled' : ''}>${quizState.index >= quiz.length - 1 ? 'Finish' : 'Next'}</button>
+            <button class="btn primary" id="quizNext" ${!chosen ? 'disabled' : ''}>${quizState.index >= quiz.length - 1 ? 'Finish' : 'Next'}</button>
             <button class="btn" id="quizReset">Reset quiz</button>
           </div>
         </div>` : `<div class="quiz"><h4>Quiz complete</h4><p class="quiz-hint">You finished all questions for this topic.</p><div class="quiz-explanation"><strong>Score:</strong> ${quizScore}/${quiz.length}</div><div class="toolbar" style="margin-top:14px"><button class="btn primary" id="quizReset">Review again</button></div></div>`}
@@ -567,6 +568,7 @@ function renderTopic(slug){
     </div>`;
   document.getElementById('markDone').onclick = () => { state.done.has(key) ? state.done.delete(key) : state.done.add(key); setStorage(); updateStats(); render(); };
   document.getElementById('bookmarkBtn').onclick = () => { state.bookmarks.has(key) ? state.bookmarks.delete(key) : state.bookmarks.add(key); setStorage(); updateStats(); render(); };
+  const quiz = buildQuiz(topic);
   document.querySelectorAll('.quiz .option').forEach(btn => {
     btn.onclick = () => {
       const qid = btn.closest('.quiz').dataset.qid;
@@ -581,7 +583,15 @@ function renderTopic(slug){
   const quizNext = document.getElementById('quizNext');
   const quizReset = document.getElementById('quizReset');
   if (quizPrev) quizPrev.onclick = () => { const info = state.quizState[key] || {index: 0, answers: {}, finished: false}; info.index = Math.max(0, (info.index || 0) - 1); info.finished = false; state.quizState[key] = info; renderTopic(slug); };
-  if (quizNext) quizNext.onclick = () => { const info = state.quizState[key] || {index: 0, answers: {}, finished: false}; if ((info.index || 0) >= quiz.length - 1) info.finished = true; else info.index = Math.min(quiz.length - 1, (info.index || 0) + 1); state.quizState[key] = info; renderTopic(slug); };
+  if (quizNext) quizNext.onclick = () => {
+    const info = state.quizState[key] || {index: 0, answers: {}, finished: false};
+    const current = quiz[info.index || 0];
+    if (current && !info.answers?.[current.id]) return;
+    if ((info.index || 0) >= quiz.length - 1) info.finished = true;
+    else info.index = Math.min(quiz.length - 1, (info.index || 0) + 1);
+    state.quizState[key] = info;
+    renderTopic(slug);
+  };
   if (quizReset) quizReset.onclick = () => { state.quizState[key] = {index: 0, answers: {}, finished: false}; renderTopic(slug); };
   const anchor = parseRoute().anchor;
   if (anchor) requestAnimationFrame(() => document.getElementById(anchor)?.scrollIntoView({block:'start'}));
@@ -699,7 +709,7 @@ function renderHomeBody(){
           <div class="stat"><span>Modules</span><strong>${state.data.stats.modules}</strong></div>
           <div class="stat"><span>Topics</span><strong>${state.data.stats.topics}</strong></div>
           <div class="stat"><span>Resources</span><strong>${state.data.stats.resources}</strong></div>
-          <div class="stat"><span>Sections</span><strong>${state.data.stats.resourceSections}</strong></div>
+          <div class="stat"><span>Sections</span><strong>${state.data.stats.sections || totalTopicSections()}</strong></div>
           <div class="stat"><span>Done</span><strong>${done}</strong></div>
         </div>
       </div>
