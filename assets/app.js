@@ -10,6 +10,8 @@ const state = {
   bookmarks: new Set(JSON.parse(localStorage.getItem('im-bookmarks') || '[]')),
   done: new Set(JSON.parse(localStorage.getItem('im-done') || '[]')),
   aiHistory: JSON.parse(localStorage.getItem('im-ai-history') || '[]'),
+  aiOpen: JSON.parse(localStorage.getItem('im-ai-open') || 'false'),
+  aiPos: JSON.parse(localStorage.getItem('im-ai-pos') || '{"right":22,"bottom":96}'),
   quizState: {},
 };
 
@@ -62,6 +64,8 @@ function setStorage(){
   localStorage.setItem('im-sidebar-open', JSON.stringify(!!state.sidebarOpen));
   localStorage.setItem('im-theme', state.theme);
   localStorage.setItem('im-ai-history', JSON.stringify(state.aiHistory.slice(-40)));
+  localStorage.setItem('im-ai-open', JSON.stringify(!!state.aiOpen));
+  localStorage.setItem('im-ai-pos', JSON.stringify(state.aiPos));
 }
 function allModules(){ return normalizeSections(state.data?.parts); }
 function allResources(){ return normalizeSections(state.data?.resources); }
@@ -143,13 +147,11 @@ function setSidebar(){
 function setMobileDock(){
   const route = parseRoute();
   const activeResource = route.type === 'resource' && route.slug === 'cga-brillian';
-  const activeAi = route.type === 'ai';
   const toggle = (el, active) => { if (el) el.classList.toggle('active', !!active); };
-  toggle(els.mobileHome, state.mode === 'home' && !activeResource && !activeAi);
+  toggle(els.mobileHome, state.mode === 'home' && !activeResource);
   toggle(els.mobileStudy, state.mode === 'study');
   toggle(els.mobileReview, state.mode === 'review');
   toggle(els.mobileCga, activeResource);
-  toggle(els.mobileAi, activeAi);
 }
 function syncSearchInputs(value){
   if (els.search && els.search.value !== value) els.search.value = value;
@@ -684,38 +686,62 @@ function renderBookmarks(){
         </a>`).join('')}</div>` : '<div class="empty">Belum ada bookmark. Buka topic lalu klik ☆ Bookmark.</div>'}
     </div>`;
 }
-function renderAiTutor(){
-  els.crumbs.textContent = 'AI Tutor';
-  els.pageTitle.textContent = 'AI Tutor';
-  els.pageSubtitle.textContent = 'Tanya materi IPD Brillian; jawaban dicite dari knowledge base lokal.';
-  const messages = state.aiHistory.map(m => `
+function inlineMd(text, citations=[]){
+  return esc(text)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/\[(\d+)\]/g, (_, n) => {
+      const c = citations.find(x => String(x.id) === String(n));
+      return c ? `<a class="ai-cite" href="${esc(c.url)}" title="${esc(c.title)} — ${esc(c.section)}">[${n}]</a>` : `<span class="ai-cite">[${n}]</span>`;
+    });
+}
+function renderMarkdown(text, citations=[]){
+  const lines = String(text || '').split(/\n+/), out = [];
+  let list = null;
+  const close = () => { if (list) { out.push(`</${list}>`); list = null; } };
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line) { close(); continue; }
+    const h = line.match(/^(#{1,4})\s+(.+)/);
+    if (h) { close(); out.push(`<h${Math.min(h[1].length+2,6)}>${inlineMd(h[2], citations)}</h${Math.min(h[1].length+2,6)}>`); continue; }
+    const b = line.match(/^[-*]\s+(.+)/);
+    if (b) { if (list !== 'ul') { close(); out.push('<ul>'); list = 'ul'; } out.push(`<li>${inlineMd(b[1], citations)}</li>`); continue; }
+    const n = line.match(/^\d+[.)]\s+(.+)/);
+    if (n) { if (list !== 'ol') { close(); out.push('<ol>'); list = 'ol'; } out.push(`<li>${inlineMd(n[1], citations)}</li>`); continue; }
+    close(); out.push(`<p>${inlineMd(line, citations)}</p>`);
+  }
+  close();
+  return out.join('');
+}
+function renderAiMessages(){
+  return state.aiHistory.map(m => `
     <div class="ai-msg ${m.role}">
       <div class="ai-role">${m.role === 'assistant' ? 'AI Tutor' : 'You'}</div>
-      <div class="ai-text">${esc(m.content)}</div>
+      <div class="ai-text">${m.role === 'assistant' ? renderMarkdown(m.content, m.citations || []) : esc(m.content)}</div>
+      ${m.role === 'assistant' && m.citations?.length ? `<div class="ai-source-list">${m.citations.map(c => `<a href="${esc(c.url)}"><span>[${c.id}]</span>${esc(c.title)} — ${esc(c.section)}</a>`).join('')}</div>` : ''}
     </div>`).join('') || `<div class="ai-empty">Belum ada chat. Coba: “jelaskan sepsis hour-1 bundle”.</div>`;
-  els.content.innerHTML = `
-    <div class="ai-layout">
-      <section class="card ai-chat-card">
-        <div class="ai-disclaimer">Untuk edukasi. Jangan masukkan data pasien identifikatif. Bukan pengganti keputusan klinis.</div>
-        <div id="aiMessages" class="ai-messages">${messages}</div>
-        <form id="aiForm" class="ai-form">
-          <textarea id="aiInput" rows="3" placeholder="Tanya AI Tutor tentang materi internal medicine..."></textarea>
-          <div class="toolbar ai-actions">
-            <button class="btn primary" type="submit">Ask</button>
-            <button class="btn" type="button" data-ai-clear>Clear history</button>
-          </div>
-        </form>
-      </section>
-      <aside class="card toc ai-source-panel">
-        <h4>Quick prompts</h4>
-        <a href="#" data-ai-prompt="Jelaskan topic yang sedang saya buka dengan poin high-yield.">Explain current topic</a>
-        <a href="#" data-ai-prompt="Buat 5 pertanyaan quiz dari materi ini beserta jawabannya.">Quiz me</a>
-        <a href="#" data-ai-prompt="Ringkas tatalaksana dan red flags paling penting.">Summarize management</a>
-        <p class="ai-small">Citation lokal muncul sebagai [1], [2], dst, sesuai section di guide.</p>
-      </aside>
-    </div>`;
+}
+function renderAiFloat(){
+  document.getElementById('aiFloat')?.remove();
+  const pos = state.aiPos || {right:22,bottom:96};
+  const box = document.createElement('div');
+  box.id = 'aiFloat';
+  box.className = `ai-float ${state.aiOpen ? 'open' : ''}`;
+  box.style.right = `${Math.max(8, pos.right || 22)}px`;
+  box.style.bottom = `${Math.max(8, pos.bottom || 96)}px`;
+  box.innerHTML = `
+    <button class="ai-fab" type="button" data-ai-toggle><span>AI</span><strong>Tutor</strong></button>
+    <section class="ai-panel card">
+      <header class="ai-panel-head" data-ai-drag><div><strong>AI Tutor</strong><span>IPD Brillian KB</span></div><button type="button" data-ai-close>×</button></header>
+      <div class="ai-disclaimer">Edukasi. Jangan masukkan data pasien identifikatif.</div>
+      <div id="aiMessages" class="ai-messages">${renderAiMessages()}</div>
+      <div class="ai-quick"><button data-ai-prompt="Jelaskan topic yang sedang saya buka dengan poin high-yield.">Explain</button><button data-ai-prompt="Buat 5 pertanyaan quiz dari materi ini beserta jawabannya.">Quiz</button><button data-ai-prompt="Ringkas tatalaksana dan red flags paling penting.">Summarize</button></div>
+      <form id="aiForm" class="ai-form"><textarea id="aiInput" rows="2" placeholder="Tanya AI Tutor..."></textarea><div class="toolbar ai-actions"><button class="btn primary" type="submit">Ask</button><button class="btn" type="button" data-ai-clear>Clear</button></div></form>
+    </section>`;
+  document.body.appendChild(box);
   document.getElementById('aiMessages')?.scrollTo(0, 999999);
 }
+function renderAiTutor(){ state.aiOpen = true; setStorage(); renderAiFloat(); return renderHome(); }
 function blockText(blocks){
   return normalizeBlocks(blocks).map(b => {
     if (b.type === 'table') return normalizeSections(b.rows).map(r => normalizeSections(r).join(' | ')).join('\n');
@@ -749,7 +775,8 @@ async function submitAiTutor(text){
   if (!message) return;
   state.aiHistory.push({role:'user', content:message});
   state.aiHistory.push({role:'assistant', content:'Thinking...'});
-  setStorage(); renderAiTutor();
+  state.aiOpen = true;
+  setStorage(); renderAiFloat();
   try {
     const sources = aiLocalSources(message);
     const sourceText = sources.map(s => `[${s.id}] ${s.title} — ${s.section}\nURL: ${s.url}\n${s.text}`).join('\n\n');
@@ -762,13 +789,12 @@ async function submitAiTutor(text){
     const data = await res.json();
     state.aiHistory.pop();
     if (!res.ok) throw new Error(data.error || 'AI request failed');
-    const cites = sources.map(c => `[${c.id}] ${c.title} — ${c.section} (${c.url})`).join('\n');
-    state.aiHistory.push({role:'assistant', content:`${data.answer}\n\nModel: ${data.model || 'gpt-5-nano'}${cites ? `\n\nSources:\n${cites}` : ''}`});
+    state.aiHistory.push({role:'assistant', content:`${data.answer}\n\n**Model:** ${data.model || 'gpt-5-nano'}`, citations:sources});
   } catch (e) {
     state.aiHistory.pop();
     state.aiHistory.push({role:'assistant', content:`Error: ${e.message || e}`});
   }
-  setStorage(); renderAiTutor();
+  setStorage(); renderAiFloat();
 }
 function renderStudy(){
   els.crumbs.textContent = 'Study';
@@ -801,6 +827,7 @@ function render(){
   setSidebar();
   setMobileDock();
   renderNav();
+  renderAiFloat();
   const route = parseRoute();
   els.modeHome.classList.toggle('active', state.mode === 'home');
   els.modeStudy.classList.toggle('active', state.mode === 'study');
@@ -976,18 +1003,36 @@ async function init(){
   if (els.mobileAi) els.mobileAi.onclick = () => { state.mode = 'home'; state.search = ''; syncSearchInputs(''); location.hash = '#ai-tutor'; };
   if (els.mobileTheme) els.mobileTheme.onclick = () => { state.theme = state.theme === 'dark' ? 'light' : 'dark'; setStorage(); setTheme(); };
   if (els.mobileThemeInline) els.mobileThemeInline.onclick = () => { state.theme = state.theme === 'dark' ? 'light' : 'dark'; setStorage(); setTheme(); };
-  if (els.content) els.content.addEventListener('submit', e => {
+  document.addEventListener('submit', e => {
     if (e.target?.id === 'aiForm') {
       e.preventDefault();
       const input = document.getElementById('aiInput');
       submitAiTutor(input?.value || '');
     }
   });
-  if (els.content) els.content.addEventListener('click', e => {
+  document.addEventListener('pointerdown', e => {
+    const handle = e.target.closest('[data-ai-drag], [data-ai-toggle]');
+    const float = document.getElementById('aiFloat');
+    if (!handle || !float || (e.target.closest('button,textarea,a') && !e.target.closest('[data-ai-toggle]'))) return;
+    const startX = e.clientX, startY = e.clientY;
+    const rect = float.getBoundingClientRect();
+    const startRight = window.innerWidth - rect.right, startBottom = window.innerHeight - rect.bottom;
+    const move = ev => {
+      state.aiPos = {right: Math.max(8, startRight - (ev.clientX - startX)), bottom: Math.max(8, startBottom - (ev.clientY - startY))};
+      float.style.right = `${state.aiPos.right}px`; float.style.bottom = `${state.aiPos.bottom}px`;
+    };
+    const up = () => { setStorage(); document.removeEventListener('pointermove', move); document.removeEventListener('pointerup', up); };
+    document.addEventListener('pointermove', move); document.addEventListener('pointerup', up);
+  });
+  document.addEventListener('click', e => {
+    const toggleAi = e.target.closest('[data-ai-toggle]');
+    if (toggleAi) { e.preventDefault(); state.aiOpen = !state.aiOpen; setStorage(); renderAiFloat(); return; }
+    const closeAi = e.target.closest('[data-ai-close]');
+    if (closeAi) { e.preventDefault(); state.aiOpen = false; setStorage(); renderAiFloat(); return; }
     const prompt = e.target.closest('[data-ai-prompt]');
-    if (prompt) { e.preventDefault(); submitAiTutor(prompt.dataset.aiPrompt || ''); return; }
+    if (prompt) { e.preventDefault(); state.aiOpen = true; submitAiTutor(prompt.dataset.aiPrompt || ''); return; }
     const clear = e.target.closest('[data-ai-clear]');
-    if (clear) { e.preventDefault(); state.aiHistory = []; setStorage(); renderAiTutor(); return; }
+    if (clear) { e.preventDefault(); state.aiHistory = []; setStorage(); renderAiFloat(); return; }
     const filter = e.target.closest('[data-search-filter]');
     if (filter) {
       e.preventDefault();

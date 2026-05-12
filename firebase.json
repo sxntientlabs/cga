@@ -10,6 +10,7 @@
       ".firebaserc",
       "**/.*",
       "**/node_modules/**",
+      "functions/**",
       "build_site.py"
     ],
     "cleanUrls": true,
