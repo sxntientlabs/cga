@@ -23,11 +23,13 @@ const els = {
   modeHome: document.getElementById('modeHome'),
   modeStudy: document.getElementById('modeStudy'),
   modeReview: document.getElementById('modeReview'),
+  modeCga: document.getElementById('modeCga'),
   modeFocus: document.getElementById('modeFocus'),
   modeTheme: document.getElementById('modeTheme'),
 };
 
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function safeText(v, fallback=''){ return String(v ?? fallback); }
 function norm(s){return String(s).toLowerCase().replace(/[^a-z0-9\s]+/g,' ').replace(/\s+/g,' ').trim();}
 function topicKey(partSlug, topicSlug){return `${partSlug}/${topicSlug}`;}
 function setStorage(){
@@ -134,6 +136,7 @@ function scoreMatch(text, q){
   score += Math.min(40, qTokens.length * 5);
   return score;
 }
+function resourcePageUrl(pageSlug){ return pageSlug === 'cga-brillian' ? '#resource/cga-brillian' : `#resource/${pageSlug}`; }
 function searchAll(q){
   const query = norm(q);
   if (!query) return [];
@@ -153,11 +156,11 @@ function searchAll(q){
     }
   }
   for (const page of allResources()) {
-    const pageScore = scoreMatch(page.display + ' ' + page.title + ' ' + page.searchText, query);
-    if (pageScore) results.push({type:'resource', score: pageScore, title: page.display, subtitle: `${page.sections.length || 1} sections`, href:`#resource/${page.slug}`});
-    for (const sec of (page.sections || [])) {
-      const secScore = scoreMatch(sec.title + ' ' + sec.display + ' ' + (sec.searchText || ''), query);
-      if (secScore) results.push({type:'resource section', score: secScore + 10, title: sec.display, subtitle: page.display, href:`#resource/${page.slug}#sec-${sec.slug}`});
+    const pageScore = scoreMatch([page.display, page.title, page.searchText].filter(Boolean).join(' '), query);
+    if (pageScore) results.push({type:'resource', score: pageScore, title: safeText(page.display, page.title || 'Resource'), subtitle: `${normalizeSections(page.sections).length || 1} sections`, href:resourcePageUrl(page.slug)});
+    for (const sec of normalizeSections(page.sections)) {
+      const secScore = scoreMatch([sec.title, sec.display, sec.searchText || ''].join(' '), query);
+      if (secScore) results.push({type:'resource section', score: secScore + 10, title: safeText(sec.display, sec.title || 'Section'), subtitle: safeText(page.display, 'Resource'), href:`#resource/${page.slug}#sec-${sec.slug}`});
     }
   }
   return results.sort((a,b) => b.score - a.score).slice(0, 30);
@@ -172,8 +175,8 @@ function renderNav(){
       .map(x => x.t);
     const activePart = parseRoute().type !== 'home' && state.route.includes(part.slug);
     return `<div class="nav-part"><details ${activePart ? 'open' : ''}>
-      <summary><span>${esc(part.display)}</span><span class="part-meta">${topics.length} topic</span></summary>
-      <div class="nav-topics">${topics.map(t => `<a class="nav-topic ${state.route === `topic/${t.slug}` ? 'active' : ''}" href="#topic/${t.slug}" title="${esc(t.title)}">${esc(t.display)}</a>`).join('') || '<div class="empty" style="padding:10px 12px">No match</div>'}</div>
+      <summary><span>${esc(safeText(part.display, part.title || 'Module'))}</span><span class="part-meta">${topics.length} topic</span></summary>
+      <div class="nav-topics">${topics.map(t => `<a class="nav-topic ${state.route === `topic/${t.slug}` ? 'active' : ''}" href="#topic/${t.slug}" title="${esc(safeText(t.title, t.display || 'Topic'))}">${esc(safeText(t.display, t.title || 'Topic'))}</a>`).join('') || '<div class="empty" style="padding:10px 12px">No match</div>'}</div>
     </details></div>`;
   }).join('');
   const resourceHtml = allResources().map(page => {
@@ -184,8 +187,8 @@ function renderNav(){
       .map(x => x.s);
     const active = parseRoute().type === 'resource' && state.route.includes(page.slug);
     return `<div class="nav-part"><details ${active ? 'open' : ''}>
-      <summary><span>${esc(page.display)}</span><span class="part-meta">${sections.length} section</span></summary>
-      <div class="nav-topics">${sections.map(s => `<a class="nav-topic ${state.route.includes(`resource/${page.slug}#sec-${s.slug}`) ? 'active' : ''}" href="#resource/${page.slug}#sec-${s.slug}" title="${esc(s.title)}">${esc(s.display)}</a>`).join('') || `<div class="empty" style="padding:10px 12px">${query ? 'No match' : 'Open the page'}</div>`}</div>
+      <summary><span>${esc(safeText(page.display, page.title || 'Resource'))}</span><span class="part-meta">${sections.length} section</span></summary>
+      <div class="nav-topics">${sections.map(s => `<a class="nav-topic ${state.route.includes(`resource/${page.slug}#sec-${s.slug}`) ? 'active' : ''}" href="#resource/${page.slug}#sec-${s.slug}" title="${esc(safeText(s.title, s.display || 'Section'))}">${esc(safeText(s.display, s.title || 'Section'))}</a>`).join('') || `<div class="empty" style="padding:10px 12px">${query ? 'No match' : 'Open the page'}</div>`}</div>
     </details></div>`;
   }).join('');
   els.nav.innerHTML = moduleHtml + (resourceHtml ? `<div class="section-title" style="margin:14px 0 8px"><h3>Resources</h3><span>references & review</span></div>${resourceHtml}` : '');
@@ -225,12 +228,12 @@ function renderSearchResults(q){
         <span class="badge">${counts.module || 0} modules</span>
         <span class="badge">${(counts.resource || 0) + (counts['resource section'] || 0)} resources</span>
       </div>
-      <div class="search-results">
+    <div class="search-results">
         ${(results.length ? results : [{type:'none',score:0,title:'No match',subtitle:'Try a different keyword',href:'#home'}]).map(r => `
           <a class="search-hit" href="${r.href}">
             <div class="score">${r.type}${r.score ? ` · ${r.score}` : ''}</div>
-            <strong>${esc(r.title)}</strong>
-            <span>${esc(r.subtitle)}</span>
+            <strong>${esc(safeText(r.title, 'Untitled'))}</strong>
+            <span>${esc(safeText(r.subtitle, ''))}</span>
           </a>`).join('')}
       </div>
     </div>`;
@@ -244,8 +247,8 @@ function renderHome(){
     return `<div class="module-card" data-href="#part/${part.slug}">
       <span class="badge">${part.topics.length} topics</span>
       <span class="card-arrow">↗</span>
-      <h3>${esc(part.display)}</h3>
-      <p>${esc(first.display)} → ${esc(last.display)}</p>
+      <h3>${esc(safeText(part.display, part.title || 'Module'))}</h3>
+      <p>${esc(safeText(first.display, first.title || 'Topic'))} → ${esc(safeText(last.display, last.title || 'Topic'))}</p>
     </div>`;
   }).join('');
   const next = topics.find(t => !state.done.has(topicKey(t.partSlug, t.slug))) || topics[0];
@@ -273,6 +276,7 @@ function renderHome(){
         <p style="color:var(--muted);line-height:1.6">Buka topik berikutnya atau lompat ke modul yang lagi kamu kejar.</p>
         <div class="toolbar">
           <a class="btn primary" href="#topic/${next.slug}">Resume</a>
+          <a class="btn" href="#resource/cga-brillian">Open CGA</a>
           <button class="btn" id="resetDone">Reset progress</button>
         </div>
         <div class="note">Tip: search buat lompat langsung ke diagnosis, obat, protocol, atau section tertentu.</div>
@@ -515,10 +519,11 @@ function render(){
   setTheme();
   setFocus();
   renderNav();
+  const route = parseRoute();
   els.modeHome.classList.toggle('active', state.mode === 'home');
   els.modeStudy.classList.toggle('active', state.mode === 'study');
   els.modeReview.classList.toggle('active', state.mode === 'review');
-  const route = parseRoute();
+  if (els.modeCga) els.modeCga.classList.toggle('active', route.type === 'resource' && route.slug === 'cga-brillian');
   const q = state.search.trim();
   if (state.mode === 'review') return renderReview();
   if (route.type === 'topic') return renderTopic(route.slug);
@@ -551,11 +556,11 @@ function renderHomeBody(){
   const done = topicDoneCount();
   const resources = allResources();
   const resourceCards = resources.map(page => `
-    <div class="module-card" data-href="#resource/${page.slug}">
-      <span class="badge">${page.sections.length || 1} sections</span>
+    <div class="module-card" data-href="${resourcePageUrl(page.slug)}">
+      <span class="badge">${normalizeSections(page.sections).length || 1} sections</span>
       <span class="card-arrow">↗</span>
-      <h3>${esc(page.display)}</h3>
-      <p>${esc(page.sections[0]?.display || page.intro?.[0]?.text || 'Reference page')}</p>
+      <h3>${esc(safeText(page.display, page.title || 'Resource'))}</h3>
+      <p>${esc(safeText(normalizeSections(page.sections)[0]?.display || page.intro?.[0]?.text, 'Reference page'))}</p>
     </div>`).join('');
   return `
     <div class="hero-grid">
@@ -622,6 +627,7 @@ async function init(){
   els.modeHome.onclick = () => { state.mode = 'home'; render(); };
   els.modeStudy.onclick = () => { state.mode = 'study'; render(); };
   els.modeReview.onclick = () => { state.mode = 'review'; render(); };
+  if (els.modeCga) els.modeCga.onclick = () => { location.hash = '#resource/cga-brillian'; };
   window.addEventListener('hashchange', setRoute);
   setTheme();
   setFocus();
