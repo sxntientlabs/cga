@@ -2,7 +2,7 @@ const { onRequest } = require('firebase-functions/v2/https');
 const { defineSecret } = require('firebase-functions/params');
 
 const OPENAI_API_KEY = defineSecret('OPENAI_API_KEY');
-const MODEL = 'gpt-5-nano';
+const MODEL = 'gpt-5-mini';
 const BASE_URL = 'https://api.openai.com/v1';
 
 function cors(res) {
