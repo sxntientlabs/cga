@@ -63,8 +63,8 @@ const assessments = {
     'isar': {
         container: 'isar-section',
         questions: [
-            { text: 'Butuh bantuan rutin dari orang lain?', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] },
-            { text: 'Lebih banyak butuh bantuan merawat diri?', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] },
+            { text: 'Sebelum sakit atau cedera yang membawa Anda ke IGD, apakah Anda butuh bantuan rutin dari orang lain?', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] },
+            { text: 'Sejak sakit atau cedera ini, apakah Anda lebih banyak membutuhkan bantuan untuk merawat diri sendiri?', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] },
             { text: 'Pernah dirawat inap dalam 6 bulan terakhir?', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] },
             { text: 'Dapat melihat dengan baik?', options: [{t:'Tidak', v:1}, {t:'Ya', v:0}] },
             { text: 'Masalah serius dengan daya ingat?', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] },
@@ -90,7 +90,7 @@ const assessments = {
         container: 'iadl-section',
         questions: [
             { text: 'Penggunaan telepon', options: [{t:'Menghubungi & mencari nomor', v:1}, {t:'Menjawab saja', v:1}, {t:'Tidak bisa', v:0}] },
-            { text: 'Kemampuan pergi ke tempat', options: [{t:'Mandiri bepergian', v:1}, {t:'Mengatur sendiri perjalanan', v:1}, {t:'Hanya jika disertai', v:1}, {t:'Tidak bepergian sama sekali', v:0}] },
+            { text: 'Kemampuan pergi ke tempat', options: [{t:'Mandiri bepergian', v:1}, {t:'Mengatur sendiri perjalanan', v:1}, {t:'Hanya jika disertai', v:0}, {t:'Tidak bepergian sama sekali', v:0}] },
             { text: 'Kemampuan berbelanja', options: [{t:'Mandiri belanja semua kebutuhan', v:1}, {t:'Perlu bantuan antar belanja', v:0}, {t:'Tidak mampu belanja', v:0}] },
             { text: 'Menyiapkan makanan', options: [{t:'Mandiri rencana & masak', v:1}, {t:'Menyiapkan bila bahan tersedia', v:0}, {t:'Perlu disiapkan & dilayani', v:0}] },
             { text: 'Pekerjaan rumah', options: [{t:'Mandiri (pekerjaan berat)', v:1}, {t:'Mandiri (pekerjaan ringan)', v:1}, {t:'Perlu bantuan', v:1}, {t:'Tidak ikut merawat rumah', v:0}] },
@@ -117,11 +117,11 @@ const assessments = {
     'gds': {
         container: 'gds-section',
         questions: [
-            { text: 'Apakah Anda sebenarnya puas dengan kehidupan Anda?', options: [{t:'Ya', v:0}, {t:'Tidak', v:1}] },
-            { text: 'Apakah Anda merasa bosan?', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] },
+            { text: 'Apakah anda sebenarnya puas dengan kehidupan anda?', options: [{t:'Ya', v:0}, {t:'Tidak', v:1}] },
+            { text: 'Apakah Anda sering merasa bosan?', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] },
             { text: 'Apakah Anda sering merasa tidak berdaya?', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] },
-            { text: 'Apakah Anda lebih senang tinggal di rumah?', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] },
-            { text: 'Apakah Anda merasa tidak berharga?', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] }
+            { text: 'Apakah Anda lebih senang tinggal di rumah daripada pergi ke luar dan mengerjakan sesuatu hal yang baru?', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] },
+            { text: 'Apakah Anda merasa tidak berharga saat ini?', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] }
         ]
     },
     'mna': {
@@ -139,8 +139,8 @@ const assessments = {
         container: 'frail-section',
         questions: [
             { text: 'Fatigue (Kelelahan)', options: [{t:'Sepanjang waktu', v:1}, {t:'Sebagian besar waktu', v:1}, {t:'Kadang-kadang', v:0}, {t:'Jarang', v:0}] },
-            { text: 'Resistance (Resistensi): Naik 10 anak tangga?', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] },
-            { text: 'Ambulation (Ambulasi): Berjalan 100-200 meter?', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] },
+            { text: 'Dengan diri sendiri/tanpa bantuan alat, apakah Anda mengalami kesulitan untuk naik 10 anak tangga dan tanpa istirahat diantaranya?', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] },
+            { text: 'Dengan diri sendiri/tanpa bantuan alat, apakah Anda mengalami kesulitan berjalan kira-kira sejauh 100-200 meter?', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] },
             { text: 'Illness (Penyakit): > 5 dari 11 penyakit utama?', options: [{t:'5-11 penyakit', v:1}, {t:'0-4 penyakit', v:0}] },
             { text: 'Loss of Weight: Penurunan BB > 5% dalam 6 bulan?', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] }
         ]
@@ -150,8 +150,8 @@ const assessments = {
         questions: [
             { text: 'Pilih kategori Clinical Frailty Scale (CFS) yang paling sesuai dengan kondisi pasien saat ini:', options: [
                 {t:'1 - Sangat Fit (Very Fit)', v:1, desc:'Energik, aktif, termotivasi, dan rajin berolahraga secara teratur.'},
-                {t:'2 - Fit (Well)', v:2, desc:'Tidak ada gejala penyakit aktif, tetapi kurang bugar dibandingkan kategori 1. Olahraga sesekali.'},
-                {t:'3 - Baik (Managing Well)', v:3, desc:'Masalah medis terkendali dengan baik, namun tidak aktif secara teratur selain berjalan kaki.'},
+                {t:'2 - Fit (Well)', v:2, desc:'Tidak mengalami gejala penyakit aktif, dan hanya latihan olahraga sesekali.'},
+                {t:'3 - Managing Well', v:3, desc:'Masalah medis terkendali dengan baik, namun tidak aktif secara teratur selain berjalan kaki.'},
                 {t:'4 - Rentan (Vulnerable)', v:4, desc:'Tidak bergantung pada orang lain, namun gejala membatasi aktivitas. Sering merasa "lamban" atau lelah.'},
                 {t:'5 - Frailty Ringan (Mildly Frail)', v:5, desc:'Melambat secara nyata, butuh bantuan dalam IADL tingkat tinggi (keuangan, transportasi, belanja, obat).'},
                 {t:'6 - Frailty Sedang (Moderately Frail)', v:6, desc:'Butuh bantuan untuk aktivitas luar dan merawat rumah. Masalah dengan tangga, butuh bantuan mandi/berpakaian.'},
@@ -165,7 +165,7 @@ const assessments = {
         container: 'sar-section',
         questions: [
             { text: 'Kekuatan (Strength): Membawa beban 5 kg?', options: [{t:'Sangat sulit', v:2}, {t:'Beberapa kesulitan', v:1}, {t:'Tidak ada kesulitan', v:0}] },
-            { text: 'Bantuan Berjalan?', options: [{t:'Sangat sulit/pakai alat bantu/tidak bisa', v:2}, {t:'Beberapa kesulitan', v:1}, {t:'Tidak ada kesulitan', v:0}] },
+            { text: 'Seberapa sulit bagi Anda untuk berjalan menyeberangi sebuah ruangan?', options: [{t:'Sangat sulit/pakai alat bantu/tidak bisa', v:2}, {t:'Beberapa kesulitan', v:1}, {t:'Tidak ada kesulitan', v:0}] },
             { text: 'Bangkit dari Kursi?', options: [{t:'Sangat sulit/tidak bisa tanpa bantuan', v:2}, {t:'Beberapa kesulitan', v:1}, {t:'Tidak ada kesulitan', v:0}] },
             { text: 'Menaiki Tangga?', options: [{t:'Sangat sulit/tidak bisa', v:2}, {t:'Beberapa kesulitan', v:1}, {t:'Tidak ada kesulitan', v:0}] },
             { text: 'Jatuh (1 tahun terakhir)?', options: [{t:'4 kali atau lebih', v:2}, {t:'1-3 kali jatuh', v:1}, {t:'Tidak pernah', v:0}] }
@@ -181,7 +181,7 @@ const assessments = {
             { text: 'Jenis Kelamin (Laki-laki)', options: [{t:'Laki-laki', v:1}, {t:'Perempuan', v:0}] },
             { text: 'Pemberian Antiepilepsi', options: [{t:'Ya', v:2}, {t:'Tidak', v:0}] },
             { text: 'Pemberian Benzodiazepine', options: [{t:'Ya', v:1}, {t:'Tidak', v:0}] },
-            { text: 'Get-Up-and-Go Test', options: [{t:'Mandiri (bisa bangkit sekali coba)', v:0}, {t:'Perlu bantuan/dorongan', v:1}, {t:'Sangat sulit/tidak bisa tanpa bantuan', v:3}, {t:'Hanya duduk di tepi tempat tidur', v:4}] }
+            { text: 'Get-Up-and-Go Test: Bangun dari kursi', options: [{t:'Kemampuan bangun dari kursi dengan pergerakan tunggal – tanpa kehilangan keseimbangan dan melangkah', v:0}, {t:'Sambil melakukan dorongan untuk bangun dari kursi, sukses dalam sekali percobaan', v:1}, {t:'Percobaan lebih dari sekali namun berhasil', v:3}, {t:'Tidak dapat bangun dari kursi tanpa bantuan selama pemeriksaan', v:4}] }
         ]
     },
     'braden': {
