@@ -511,38 +511,103 @@ function renderCgaBrillianResource(page){
       </aside>
     </div>`;
 }
-function sectionQuizSummary(sec){
-  const text = summaryFromBlocks(sec.blocks);
-  return safeText(text, safeText(sec.display || sec.title, 'Core point'));
+function quizText(v, max = 240){
+  const text = safeText(v, '').replace(/\s+/g, ' ').trim();
+  if (text.length < 2 || text.length > max) return '';
+  if (/^(same|idem|[-–—])$/i.test(text)) return '';
+  return text;
+}
+function quizFacts(topic){
+  const facts = [];
+  const seen = new Set();
+  const add = fact => {
+    const answer = quizText(fact.answer || fact.text);
+    const key = norm(`${fact.kind}|${fact.section}|${answer}`);
+    if (!answer || seen.has(key)) return;
+    seen.add(key);
+    facts.push({...fact, answer});
+  };
+  for (const sec of normalizeSections(topic.sections)) {
+    const section = safeText(sec.display || sec.title, 'Section');
+    for (const block of normalizeBlocks(sec.blocks)) {
+      if (block.type === 'table') {
+        const rows = normalizeSections(block.rows).map(row => normalizeSections(row).map(cell => safeText(cell, ''))).filter(row => row.some(Boolean));
+        const headers = rows[0] || [];
+        for (const row of rows.slice(1)) {
+          const key = quizText(row[0], 120);
+          for (let i = 1; i < row.length; i++) {
+            const header = quizText(headers[i], 120);
+            const answer = quizText(row[i]);
+            if (key && header && answer) add({kind:'table', section, key, field:header, answer, priority:4});
+          }
+        }
+        continue;
+      }
+      const text = quizText(block.text);
+      if (!text) continue;
+      const priority = /\d|≥|≤|<|>|%|mg|IU|mmHg|ULN|criteria|diagnos|treat|therapy|management|indication|contra/i.test(text + ' ' + section) ? 3 : 1;
+      add({kind:'fact', section, answer:text, priority});
+    }
+  }
+  return facts.sort((a,b) => b.priority - a.priority || a.section.localeCompare(b.section));
+}
+function quizDistractors(answer, facts, kind, field){
+  const picked = [];
+  const used = new Set([norm(answer)]);
+  const add = text => {
+    text = quizText(text);
+    const key = norm(text);
+    if (!text || used.has(key)) return;
+    used.add(key); picked.push(text);
+  };
+  for (const fact of facts) {
+    if (kind === 'table' && fact.kind !== 'table') continue;
+    if (field && fact.field !== field) continue;
+    add(fact.answer);
+    if (picked.length === 3) break;
+  }
+  for (const fact of facts) {
+    add(fact.answer);
+    if (picked.length === 3) break;
+  }
+  const generic = [
+    'Tidak disebutkan sebagai poin utama pada topik ini',
+    'Bukan pilihan yang paling sesuai dengan konteks klinis ini',
+    'Hanya berlaku pada kondisi berbeda',
+    'Tidak menjadi dasar penilaian pada bagian ini'
+  ];
+  for (const text of generic) {
+    if (picked.length === 3) break;
+    add(text);
+  }
+  return picked.length === 3 ? picked : [];
+}
+function makeQuizQuestion(fact, facts, idx){
+  const distractors = quizDistractors(fact.answer, facts, fact.kind, fact.field);
+  if (distractors.length < 3) return null;
+  const question = fact.kind === 'table'
+    ? `Pada ${fact.section}, jika ${fact.key}, apa ${fact.field} yang benar?`
+    : `Manakah pernyataan yang benar tentang ${fact.section}?`;
+  const explanation = fact.kind === 'table'
+    ? `${fact.section}: ${fact.key} → ${fact.field}: ${fact.answer}`
+    : `${fact.section}: ${fact.answer}`;
+  const options = [fact.answer, ...distractors].map((text, optIdx) => ({
+    id: `q${idx}_o${optIdx}`,
+    text,
+    correct: optIdx === 0,
+  })).sort((a,b) => a.text.localeCompare(b.text));
+  if (new Set(options.map(o => norm(o.text))).size !== 4) return null;
+  return { id:`q${idx}`, question, options, answerId:options.find(o => o.correct)?.id, explanation };
 }
 function buildQuiz(topic){
-  const candidates = normalizeSections(topic.sections)
-    .filter(sec => sectionQuizSummary(sec).length > 8)
-    .slice(0, 6);
-  const pool = candidates.map(sec => ({
-    label: safeText(sec.display || sec.title, 'Section'),
-    summary: sectionQuizSummary(sec),
-  }));
-  return pool.slice(0, 4).map((item, idx) => {
-    const distractors = pool
-      .filter(x => x.summary !== item.summary)
-      .map(x => x.summary)
-      .slice(0, 3);
-    while (distractors.length < 3) distractors.push(topic.display);
-    const options = [item.summary, ...distractors].map((text, optIdx) => ({
-      id: `q${idx}_o${optIdx}`,
-      text,
-      correct: optIdx === 0,
-    })).sort((a,b) => a.text.localeCompare(b.text));
-    const answerId = options.find(o => o.correct)?.id;
-    return {
-      id: `q${idx}`,
-      question: `Pilih ringkasan yang paling sesuai dengan section: ${item.label}`,
-      options,
-      answerId,
-      explanation: item.summary,
-    };
-  });
+  const facts = quizFacts(topic);
+  const quiz = [];
+  for (const fact of facts) {
+    const q = makeQuizQuestion(fact, facts, quiz.length);
+    if (q) quiz.push(q);
+    if (quiz.length >= 8) break;
+  }
+  return quiz;
 }
 function renderStudyTools(topic){
   const quiz = buildQuiz(topic);
